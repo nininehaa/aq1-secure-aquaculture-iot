@@ -9,3 +9,44 @@
 - Output used: Project explanation, GitHub setup instructions and proposed initial structure.
 - Changes made by the team: The team will review and adapt all suggestions to match the approved AQ-1 scenario.
 - Validation: Information was compared with the AQ-1 scenario, Capstone Checklist, Weekly Guide and Teamwork Framework.
+
+## 11 August 2026 – Week 5 Technical Development
+
+### Sahil Basnet
+
+**Tool:** ChatGPT
+
+**Purpose:**  
+Used as a technical support resource while setting up the MQTT prototype and troubleshooting the initial sensor-to-gateway communication.
+
+**AI-assisted areas:**  
+- MQTT/Mosquitto setup guidance
+- Python MQTT publishing and subscribing examples
+- Troubleshooting installation and connection issues
+
+**Student contribution and validation:**  
+Sahil installed and configured the required software, created and ran the dissolved-oxygen sensor and gateway scripts, tested MQTT publish/subscribe behaviour, resolved local setup issues, and verified the sensor-to-gateway workflow before committing the implementation to GitHub.
+
+---
+
+### Neha Thanait
+
+**Tool:** ChatGPT
+
+**Purpose:**  
+Used as a consultation and troubleshooting resource while developing the monitoring and testing component of the prototype.
+
+**AI-assisted areas:**  
+- MQTT monitoring structure
+- Timestamped event logging
+- Timeout-based sensor outage detection
+- Initial acceptance-test planning
+
+**Student contribution and validation:**  
+Neha configured and ran the monitoring environment, tested incoming dissolved-oxygen readings, verified that readings were written to the log, implemented and tested the sensor timeout behaviour, and manually stopped the sensor to confirm that the system generated an outage alert after the configured 10-second threshold. The monitoring and test artefacts were reviewed and committed through Neha's GitHub branch before being merged into main.
+
+---
+
+### Validation
+
+AI-generated suggestions were not accepted as evidence by themselves. Technical outputs were tested in the local project environment and adjusted where required. The team remains responsible for understanding, explaining and validating all submitted code, configuration and documentation.
