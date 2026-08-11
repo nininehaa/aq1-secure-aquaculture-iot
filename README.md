@@ -6,6 +6,7 @@ Coral Coast Aquaculture
 ## Team Members
 - Neha Thanait
 - Sahil Basnet
+- Md Monirul Haque Arnob
 
 ## Project Scenario
 AQ-1 — IoT/Sensor Security for a Prawn and Barramundi Farm
@@ -19,12 +20,15 @@ monitor sensor availability, reject spoofed readings and maintain a safe
 control state when reliable sensor information is unavailable.
 
 ## Proposed Technologies
+
 - Python sensor simulators
 - Eclipse Mosquitto MQTT broker
-- Node-RED
+- Python gateway and monitoring scripts
+- HMAC-based message integrity
 - GitHub and GitHub Projects
 - Microsoft Teams
 - Wireshark
+- Docker/virtualisation if required
 
 ## Minimum Demonstration
 1. An authorised sensor sends a valid reading.
