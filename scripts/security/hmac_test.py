@@ -7,7 +7,6 @@ SECRET_KEY = b"aq1-week5-secret-key"
 original_message = b"sensor01|DO|6.8"
 modified_message = b"sensor01|DO|1.0"
 
-# The sensor generates an HMAC for the original reading.
 generated_hmac = hmac.new(
     SECRET_KEY,
     original_message,
@@ -17,7 +16,6 @@ generated_hmac = hmac.new(
 print(f"Original message: {original_message.decode()}")
 print(f"Generated HMAC: {generated_hmac}")
 
-# The gateway verifies the unchanged message.
 expected_hmac = hmac.new(
     SECRET_KEY,
     original_message,
@@ -29,7 +27,6 @@ if hmac.compare_digest(generated_hmac, expected_hmac):
 else:
     print("FAIL: message integrity check failed")
 
-# The gateway checks a message whose sensor value was changed.
 modified_hmac = hmac.new(
     SECRET_KEY,
     modified_message,
