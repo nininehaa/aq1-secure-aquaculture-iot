@@ -156,13 +156,49 @@ Not yet implemented/tested.
 
 ---
 
+## TC-W6-10 — Valid Temperature HMAC
+
+**Objective:** Verify that a legitimate temperature sensor message with a valid HMAC-SHA256 signature is accepted.
+
+**Expected Result:**  
+The monitor accepts the temperature reading and displays `HMAC: VALID`.
+
+**Actual Result:**  
+The updated secure temperature sensor published signed readings and the monitor accepted them with `HMAC: VALID`.
+
+**Status:** PASS
+
+---
+
+## TC-W6-11 — Tampered Temperature Message
+
+**Objective:** Verify that a temperature message modified after signing is rejected.
+
+**Expected Result:**  
+The monitor rejects the tampered temperature message because the received HMAC no longer matches the message contents.
+
+**Actual Result:**  
+The tamper test changed the signed temperature value and status after the HMAC was generated. The monitor rejected the message and reported `HMAC verification failed`.
+
+**Status:** PASS
+
+---
+
 ## Week 6 Summary
 
 The Week 6 prototype successfully demonstrates:
+
 - HMAC-SHA256 integrity verification for dissolved oxygen readings
 - rejection of tampered DO messages
-- rejection of malformed messages
+- rejection of malformed DO messages
+- HMAC-SHA256 integrity verification for temperature readings
+- rejection of tampered temperature messages
 - independent outage detection for DO and temperature
 - recovery detection for both monitored sensors
+- invalid or unsigned temperature data is not treated as trusted sensor activity
 
-The remaining Week 6 integration tasks are MQTT authentication testing and fail-safe control testing.
+The remaining integration tasks are:
+
+- verify MQTT broker rejection of missing or incorrect credentials
+- implement and test SAFE/HOLD fail-safe control
+- continue the GNS3 virtualised deployment
