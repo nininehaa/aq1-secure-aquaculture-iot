@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+import os
 import threading
 import time
 from datetime import datetime
@@ -23,8 +24,17 @@ EXPECTED_SENSORS = {
     "TEMP-001": "Temperature",
 }
 
-# Must match the key currently used by do_sensor.py
+# Must match do_sensor.py
 DO_HMAC_KEY = b"aq1-week5-secret-key"
+
+# Must match Sahil's temperature sensor environment variable
+TEMP_HMAC_KEY = os.getenv("AQ1_TEMP_HMAC_KEY")
+
+if not TEMP_HMAC_KEY:
+    raise RuntimeError(
+        "AQ1_TEMP_HMAC_KEY is not configured."
+    )
+
 
 last_valid_message = {
     sensor_id: None
@@ -40,11 +50,17 @@ state_lock = threading.Lock()
 
 
 def current_timestamp():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
 
 
 def write_log(line):
-    with open("sensor.log", "a", encoding="utf-8") as file:
+    with open(
+        "sensor.log",
+        "a",
+        encoding="utf-8",
+    ) as file:
         file.write(line + "\n")
 
 
@@ -52,6 +68,10 @@ def log_event(line):
     print(line)
     write_log(line)
 
+
+# ==================================================
+# DO HMAC VERIFICATION
+# ==================================================
 
 def verify_do_hmac(payload):
     required_fields = {
@@ -62,7 +82,10 @@ def verify_do_hmac(payload):
     }
 
     if not required_fields.issubset(payload):
-        return False, "Required DO fields are missing"
+        return (
+            False,
+            "Required DO fields are missing",
+        )
 
     sensor_id = payload["sensor_id"]
     sensor_type = payload["sensor_type"]
@@ -70,16 +93,28 @@ def verify_do_hmac(payload):
     received_hmac = payload["hmac"]
 
     if sensor_id != "sensor01":
-        return False, "Unknown DO sensor identity"
+        return (
+            False,
+            "Unknown DO sensor identity",
+        )
 
     if sensor_type != "DO":
-        return False, "Invalid DO sensor type"
+        return (
+            False,
+            "Invalid DO sensor type",
+        )
 
     if not isinstance(received_hmac, str):
-        return False, "Invalid HMAC field"
+        return (
+            False,
+            "Invalid HMAC field",
+        )
 
-    # Must exactly match the format used by do_sensor.py
-    signed_message = f"{sensor_id}|{sensor_type}|{value}"
+    signed_message = (
+        f"{sensor_id}|"
+        f"{sensor_type}|"
+        f"{value}"
+    )
 
     expected_hmac = hmac.new(
         DO_HMAC_KEY,
@@ -91,10 +126,96 @@ def verify_do_hmac(payload):
         received_hmac,
         expected_hmac,
     ):
-        return False, "HMAC verification failed"
+        return (
+            False,
+            "HMAC verification failed",
+        )
 
     return True, "HMAC valid"
 
+
+# ==================================================
+# TEMPERATURE HMAC VERIFICATION
+# ==================================================
+
+def verify_temperature_hmac(payload):
+    required_fields = {
+        "sensor_id",
+        "pond_id",
+        "sensor_type",
+        "value",
+        "unit",
+        "status",
+        "timestamp",
+        "hmac",
+    }
+
+    if not required_fields.issubset(payload):
+        return (
+            False,
+            "Required temperature fields are missing",
+        )
+
+    sensor_id = payload["sensor_id"]
+    pond_id = payload["pond_id"]
+    sensor_type = payload["sensor_type"]
+    value = payload["value"]
+    unit = payload["unit"]
+    status = payload["status"]
+    timestamp = payload["timestamp"]
+    received_hmac = payload["hmac"]
+
+    if sensor_id != "TEMP-001":
+        return (
+            False,
+            "Unknown temperature sensor identity",
+        )
+
+    if sensor_type != "temperature":
+        return (
+            False,
+            "Invalid temperature sensor type",
+        )
+
+    if not isinstance(received_hmac, str):
+        return (
+            False,
+            "Invalid HMAC field",
+        )
+
+    # Must exactly match Sahil's signing format:
+    # sensor_id|pond_id|sensor_type|value|unit|status|timestamp
+    signed_message = (
+        f"{sensor_id}|"
+        f"{pond_id}|"
+        f"{sensor_type}|"
+        f"{value}|"
+        f"{unit}|"
+        f"{status}|"
+        f"{timestamp}"
+    )
+
+    expected_hmac = hmac.new(
+        TEMP_HMAC_KEY.encode("utf-8"),
+        signed_message.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+    if not hmac.compare_digest(
+        received_hmac,
+        expected_hmac,
+    ):
+        return (
+            False,
+            "HMAC verification failed",
+        )
+
+    return True, "HMAC valid"
+
+
+# ==================================================
+# SENSOR IDENTIFICATION
+# ==================================================
 
 def detect_sensor_id(payload, topic):
     if isinstance(payload, dict):
@@ -112,20 +233,37 @@ def detect_sensor_id(payload, topic):
     return None
 
 
+# ==================================================
+# VALID READING / RECOVERY STATE
+# ==================================================
+
 def record_valid_reading(sensor_id):
     with state_lock:
-        was_offline = outage_reported[sensor_id]
+        was_offline = outage_reported[
+            sensor_id
+        ]
 
-        last_valid_message[sensor_id] = time.time()
-        outage_reported[sensor_id] = False
+        last_valid_message[
+            sensor_id
+        ] = time.time()
+
+        outage_reported[
+            sensor_id
+        ] = False
 
     if was_offline:
         log_event(
-            f"{current_timestamp()} | RECOVERY | "
-            f"{EXPECTED_SENSORS[sensor_id]} sensor {sensor_id} "
+            f"{current_timestamp()} | "
+            f"RECOVERY | "
+            f"{EXPECTED_SENSORS[sensor_id]} "
+            f"sensor {sensor_id} "
             f"is online again"
         )
 
+
+# ==================================================
+# MQTT CALLBACKS
+# ==================================================
 
 def on_connect(
     client,
@@ -141,8 +279,14 @@ def on_connect(
         )
 
         for topic, qos in TOPICS:
-            client.subscribe(topic, qos)
-            print(f"Subscribed to: {topic}")
+            client.subscribe(
+                topic,
+                qos,
+            )
+
+            print(
+                f"Subscribed to: {topic}"
+            )
 
     else:
         print(
@@ -151,22 +295,33 @@ def on_connect(
         )
 
 
-def on_message(client, userdata, message):
+def on_message(
+    client,
+    userdata,
+    message,
+):
     timestamp = current_timestamp()
 
     try:
-        decoded_payload = message.payload.decode("utf-8")
+        decoded_payload = (
+            message.payload.decode(
+                "utf-8"
+            )
+        )
 
     except UnicodeDecodeError:
         log_event(
-            f"{timestamp} | SECURITY ALERT | "
+            f"{timestamp} | "
+            f"SECURITY ALERT | "
             f"Unreadable payload rejected | "
             f"Topic: {message.topic}"
         )
         return
 
     try:
-        payload = json.loads(decoded_payload)
+        payload = json.loads(
+            decoded_payload
+        )
 
     except json.JSONDecodeError:
         payload = decoded_payload
@@ -178,91 +333,143 @@ def on_message(client, userdata, message):
 
     if sensor_id is None:
         log_event(
-            f"{timestamp} | SECURITY ALERT | "
+            f"{timestamp} | "
+            f"SECURITY ALERT | "
             f"Unknown sensor message | "
             f"Topic: {message.topic}"
         )
         return
 
-    # ---------------------------------
-    # Dissolved oxygen security check
-    # ---------------------------------
+    # ==================================================
+    # DO SECURITY CHECK
+    # ==================================================
+
     if sensor_id == "sensor01":
 
-        if not isinstance(payload, dict):
+        if not isinstance(
+            payload,
+            dict,
+        ):
             log_event(
-                f"{timestamp} | SECURITY ALERT | "
+                f"{timestamp} | "
+                f"SECURITY ALERT | "
                 f"DO reading rejected | "
                 f"Reason: Expected JSON payload"
             )
             return
 
-        is_valid, reason = verify_do_hmac(payload)
+        is_valid, reason = (
+            verify_do_hmac(
+                payload
+            )
+        )
 
         if not is_valid:
             log_event(
-                f"{timestamp} | SECURITY ALERT | "
+                f"{timestamp} | "
+                f"SECURITY ALERT | "
                 f"DO reading rejected | "
                 f"Sensor: {sensor_id} | "
                 f"Reason: {reason}"
             )
             return
 
-        # IMPORTANT:
-        # DO outage timer is reset only after
-        # successful HMAC verification.
-        record_valid_reading(sensor_id)
+        # Only valid HMAC messages
+        # reset the outage timer.
+        record_valid_reading(
+            sensor_id
+        )
 
-        value = payload.get("value")
+        value = payload.get(
+            "value"
+        )
 
         log_event(
-            f"{timestamp} | ACCEPTED | "
+            f"{timestamp} | "
+            f"ACCEPTED | "
             f"Sensor: {sensor_id} | "
             f"Type: DO | "
             f"Value: {value} mg/L | "
             f"HMAC: VALID"
         )
+
         return
 
-    # ---------------------------------
-    # Temperature handling
-    # ---------------------------------
+    # ==================================================
+    # TEMPERATURE SECURITY CHECK
+    # ==================================================
+
     if sensor_id == "TEMP-001":
 
-        # Temperature HMAC is not enabled yet,
-        # so keep the existing monitoring logic.
-        record_valid_reading(sensor_id)
-
-        if isinstance(payload, dict):
-            value = payload.get(
-                "value",
-                "UNKNOWN",
-            )
-
-            unit = payload.get(
-                "unit",
-                "C",
-            )
-
+        if not isinstance(
+            payload,
+            dict,
+        ):
             log_event(
-                f"{timestamp} | RECEIVED | "
-                f"Sensor: TEMP-001 | "
-                f"Type: temperature | "
-                f"Value: {value} {unit} | "
-                f"HMAC: NOT YET ENABLED"
+                f"{timestamp} | "
+                f"SECURITY ALERT | "
+                f"Temperature reading rejected | "
+                f"Reason: Expected JSON payload"
             )
+            return
 
-        else:
+        is_valid, reason = (
+            verify_temperature_hmac(
+                payload
+            )
+        )
+
+        if not is_valid:
             log_event(
-                f"{timestamp} | RECEIVED | "
-                f"Sensor: TEMP-001 | "
-                f"Value: {payload}"
+                f"{timestamp} | "
+                f"SECURITY ALERT | "
+                f"Temperature reading rejected | "
+                f"Sensor: {sensor_id} | "
+                f"Reason: {reason}"
             )
+            return
 
+        # Only valid HMAC temperature
+        # messages reset the timer.
+        record_valid_reading(
+            sensor_id
+        )
+
+        value = payload.get(
+            "value"
+        )
+
+        unit = payload.get(
+            "unit",
+            "C",
+        )
+
+        status = payload.get(
+            "status",
+            "UNKNOWN",
+        )
+
+        log_event(
+            f"{timestamp} | "
+            f"ACCEPTED | "
+            f"Sensor: {sensor_id} | "
+            f"Type: temperature | "
+            f"Value: {value} {unit} | "
+            f"Status: {status} | "
+            f"HMAC: VALID"
+        )
+
+        return
+
+
+# ==================================================
+# SENSOR OUTAGE MONITOR
+# ==================================================
 
 def check_sensor_outages():
     while True:
         current_time = time.time()
+
         alerts = []
 
         with state_lock:
@@ -271,21 +478,30 @@ def check_sensor_outages():
                 sensor_name,
             ) in EXPECTED_SENSORS.items():
 
-                last_seen = last_valid_message[sensor_id]
+                last_seen = (
+                    last_valid_message[
+                        sensor_id
+                    ]
+                )
 
                 if last_seen is None:
                     continue
 
                 seconds_without_data = (
-                    current_time - last_seen
+                    current_time
+                    - last_seen
                 )
 
                 if (
                     seconds_without_data
                     > SENSOR_TIMEOUT
-                    and not outage_reported[sensor_id]
+                    and not outage_reported[
+                        sensor_id
+                    ]
                 ):
-                    outage_reported[sensor_id] = True
+                    outage_reported[
+                        sensor_id
+                    ] = True
 
                     alerts.append(
                         f"{current_timestamp()} | "
@@ -297,10 +513,16 @@ def check_sensor_outages():
                     )
 
         for alert in alerts:
-            log_event(alert)
+            log_event(
+                alert
+            )
 
         time.sleep(1)
 
+
+# ==================================================
+# MQTT CLIENT
+# ==================================================
 
 client = mqtt.Client(
     mqtt.CallbackAPIVersion.VERSION2,
@@ -310,10 +532,16 @@ client = mqtt.Client(
 client.on_connect = on_connect
 client.on_message = on_message
 
+
 outage_thread = threading.Thread(
     target=check_sensor_outages,
     daemon=True,
 )
+
+
+# ==================================================
+# MAIN
+# ==================================================
 
 try:
     client.connect(
@@ -322,37 +550,57 @@ try:
         60,
     )
 
-    print("AQ-1 Secure Multi-Sensor Monitor")
-    print("--------------------------------")
+    print(
+        "AQ-1 Secure Multi-Sensor Monitor"
+    )
+
+    print(
+        "--------------------------------"
+    )
+
     print(
         f"Outage timeout: "
         f"{SENSOR_TIMEOUT} seconds"
     )
 
-    print("Expected sensors:")
+    print()
+
+    print(
+        "Expected sensors:"
+    )
 
     for (
         sensor_id,
         sensor_name,
     ) in EXPECTED_SENSORS.items():
+
         print(
             f"- {sensor_name}: "
             f"{sensor_id}"
         )
 
     print()
-    print("DO HMAC verification: ENABLED")
+
     print(
-        "Temperature HMAC verification: "
-        "PENDING SENSOR UPDATE"
+        "DO HMAC verification: ENABLED"
     )
+
+    print(
+        "Temperature HMAC verification: ENABLED"
+    )
+
     print()
 
     outage_thread.start()
+
     client.loop_forever()
 
+
 except KeyboardInterrupt:
-    print("\nMonitoring stopped.")
+    print(
+        "\nMonitoring stopped."
+    )
+
 
 finally:
     client.disconnect()
