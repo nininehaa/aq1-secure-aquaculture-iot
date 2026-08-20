@@ -9,8 +9,9 @@ The documentation is written so that another student, tutor or developer can und
 1. [Project overview](project-overview.md) — why the project exists and what problem it solves.
 2. [Team roles](team-roles.md) — who is responsible for each technical area.
 3. [Current architecture](architecture/current-week6-architecture.md) — current working prototype and GNS3 scale-up direction.
-4. [Project decisions](project-decisions.md) — important technical choices and why they were made.
-5. [Troubleshooting log](troubleshooting.md) — implementation problems, investigation and resolution.
+4. [Local demo setup](setup/local-demo-setup.md) — how to reproduce the current secure MQTT temperature demo.
+5. [Project decisions](project-decisions.md) — important technical choices and why they were made.
+6. [Troubleshooting log](troubleshooting.md) — implementation problems, investigation and resolution.
 
 ## Implementation Documentation
 
