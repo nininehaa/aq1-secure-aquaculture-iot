@@ -29,7 +29,8 @@ Implemented in the repository:
 - controlled temperature tamper-test client
 - rejection of tampered sensor messages by the monitoring logic
 - independent sensor outage and recovery monitoring
-- Week 6 security test plan
+- Week 6 security test plan and recorded results
+- technical decision, troubleshooting and implementation documentation
 
 Current integration work still includes:
 
@@ -78,11 +79,25 @@ SAFE/HOLD control integration (pending)
 
 ## Documentation
 
+Start with the [project documentation index](docs/README.md).
+
+Key documents:
+
 - [Project overview](docs/project-overview.md)
-- [Initial architecture](docs/architecture/system-architecture.md)
+- [Team roles and ownership](docs/team-roles.md)
 - [Current Week 6 architecture and GNS3 direction](docs/architecture/current-week6-architecture.md)
+- [Local demo setup guide](docs/setup/local-demo-setup.md)
+- [Project decision log](docs/project-decisions.md)
+- [Troubleshooting log](docs/troubleshooting.md)
+- [Security design](docs/security/security-design.md)
+- [Temperature sensor implementation](docs/implementation/temperature-sensor.md)
+- [MQTT broker and authentication](docs/implementation/mqtt-broker.md)
+- [Monitoring and trust verification](docs/implementation/monitoring.md)
+- [Fail-safe controller status/design](docs/implementation/failsafe-controller.md)
 - [Security threat model](docs/security/threat-model.md)
 - [Temperature MQTT security design](docs/security/temperature-mqtt-security.md)
+- [Week 5 progress](docs/progress/week-5.md)
+- [Week 6 progress](docs/progress/week-6.md)
 - [Sahil Week 6 implementation progress](docs/progress/sahil-week6-progress.md)
 - [Week 6 security test plan](testing/Week_6_Security_Test_Plan.md)
 
@@ -94,3 +109,16 @@ SAFE/HOLD control integration (pending)
 4. A tampered sensor message fails integrity verification.
 5. A sensor outage is detected independently.
 6. The integrated control system ultimately enters `SAFE/HOLD` when trusted data is unavailable or invalid.
+
+## Documentation Approach
+
+For each meaningful implementation change the team records:
+
+1. why the work was needed
+2. what was implemented
+3. how it works
+4. how it was tested
+5. the observed result
+6. remaining work or limitations
+
+This keeps the repository understandable as an actual project rather than only a collection of source files.
