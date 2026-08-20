@@ -47,6 +47,38 @@ Neha configured and ran the monitoring environment, tested incoming dissolved-ox
 
 ---
 
+## 18–20 August 2026 – Week 6 Sahil Security Integration
+
+### Sahil Basnet
+
+**Tool:** ChatGPT
+
+**Purpose:**  
+Used as a technical support and explanation resource while strengthening the temperature-sensor MQTT security implementation, troubleshooting the local demo environment, and improving project documentation.
+
+**AI-assisted areas:**  
+- Mosquitto username/password authentication configuration and troubleshooting
+- environment-variable handling for MQTT credentials and HMAC secret
+- HMAC-SHA256 signing structure for the temperature producer
+- controlled temperature tamper-test design
+- explanation of authentication versus message integrity
+- demo-terminal setup and troubleshooting
+- documentation structure for the implemented security controls
+- planning the next GNS3 network scale-up
+
+**Student contribution and validation:**  
+Sahil ran the temperature sensor and Mosquitto environment locally, configured the required environment variables, verified successful authenticated publishing, used an authorised subscriber to confirm live temperature messages were received, and manually tested a connection without credentials to confirm that Mosquitto rejected unauthorised access. Sahil also reviewed the HMAC output and tamper-test behaviour and committed the temperature producer/security test changes to GitHub.
+
+The following implementation commits provide technical evidence of this work:
+
+- `9a5216d` — authenticated temperature sensor MQTT flow
+- `e98556c` — HMAC protection and temperature tamper test
+- `fa4ac7c` — HMAC integrity protection in the temperature sensor
+
+Project documentation was then updated to record the implemented controls, known integration gaps and planned GNS3 scale-up.
+
+---
+
 ### Validation
 
 AI-generated suggestions were not accepted as evidence by themselves. Technical outputs were tested in the local project environment and adjusted where required. The team remains responsible for understanding, explaining and validating all submitted code, configuration and documentation.
