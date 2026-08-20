@@ -11,7 +11,8 @@ The tests focus on:
 - sensor outage detection
 - recovery detection
 - malformed or tampered message rejection
-- pending MQTT authentication and fail-safe testing
+- MQTT authentication
+- pending fail-safe testing
 
 ## Test Environment
 
@@ -126,15 +127,15 @@ The monitor generated a temperature recovery event after the sensor restarted.
 
 ## TC-W6-08 — Invalid MQTT Credentials
 
-**Objective:** Verify that unauthorised sensors cannot connect to the MQTT broker.
+**Objective:** Verify that unauthorised clients cannot connect to the MQTT broker.
 
 **Expected Result:**  
 A connection using missing or incorrect credentials is rejected.
 
 **Actual Result:**  
-Not yet tested.
+Sahil tested the secured Mosquitto broker using an MQTT subscriber without supplying a username or password. The broker rejected the connection with `Connection Refused: not authorised`. A subscriber using the configured `TEMP-001` credentials was able to connect and receive live temperature messages.
 
-**Status:** PENDING
+**Status:** PASS
 
 **Owner:** Sahil
 
@@ -196,9 +197,16 @@ The Week 6 prototype successfully demonstrates:
 - independent outage detection for DO and temperature
 - recovery detection for both monitored sensors
 - invalid or unsigned temperature data is not treated as trusted sensor activity
+- broker rejection of MQTT connections without valid credentials
+- authorised MQTT subscription using the configured temperature-sensor credentials
 
 The remaining integration tasks are:
 
-- verify MQTT broker rejection of missing or incorrect credentials
-- implement and test SAFE/HOLD fail-safe control
+- add MQTT credentials to the monitoring client so it can operate against the authenticated broker configuration
+- implement and test `SAFE/HOLD` fail-safe control
+- standardise sensor MQTT topic naming and add topic-level ACLs
 - continue the GNS3 virtualised deployment
+
+## Integration Note
+
+TC-W6-08 verifies the broker-side authentication control itself. The current monitoring script still needs its own MQTT credentials before the complete authenticated producer-to-monitor path can be demonstrated under one secure broker configuration.
