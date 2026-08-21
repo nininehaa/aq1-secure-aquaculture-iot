@@ -1,4 +1,4 @@
-# Sahil Basnet — Implementation Progress to Week 6
+# Implementation Progress to Week 6
 
 ## My role in the project
 
