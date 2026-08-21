@@ -24,13 +24,13 @@ Implemented in the repository:
 - Eclipse Mosquitto MQTT messaging
 - authenticated MQTT path for temperature sensor `TEMP-001`
 - anonymous MQTT access disabled on the current secure broker configuration
-- HMAC-SHA256 integrity generation for temperature readings
+- HMAC-SHA256 integrity generation for DO and temperature readings
 - HMAC verification for dissolved-oxygen and temperature readings
 - controlled temperature tamper-test client
 - rejection of tampered sensor messages by the monitoring logic
 - independent sensor outage and recovery monitoring
 - Week 6 security test plan and recorded results
-- technical decision, troubleshooting and implementation documentation
+- technical decision, troubleshooting, setup, implementation and security documentation
 
 Current integration work still includes:
 
@@ -85,11 +85,13 @@ Key documents:
 
 - [Project overview](docs/project-overview.md)
 - [Team roles and ownership](docs/team-roles.md)
+- [Project evidence index](docs/evidence-index.md)
 - [Current Week 6 architecture and GNS3 direction](docs/architecture/current-week6-architecture.md)
 - [Local demo setup guide](docs/setup/local-demo-setup.md)
 - [Project decision log](docs/project-decisions.md)
 - [Troubleshooting log](docs/troubleshooting.md)
 - [Security design](docs/security/security-design.md)
+- [Dissolved-oxygen sensor implementation](docs/implementation/dissolved-oxygen-sensor.md)
 - [Temperature sensor implementation](docs/implementation/temperature-sensor.md)
 - [MQTT broker and authentication](docs/implementation/mqtt-broker.md)
 - [Monitoring and trust verification](docs/implementation/monitoring.md)
@@ -100,6 +102,9 @@ Key documents:
 - [Week 6 progress](docs/progress/week-6.md)
 - [Sahil Week 6 implementation progress](docs/progress/sahil-week6-progress.md)
 - [Week 6 security test plan](testing/Week_6_Security_Test_Plan.md)
+- [Consolidated security test results](testing/security-test-results.md)
+- [GNS3 deployment design](docs/gns3/gns3-design.md)
+- [Planned GNS3 addressing](docs/gns3/network-addressing.md)
 
 ## Demonstration Goals
 
@@ -122,3 +127,5 @@ For each meaningful implementation change the team records:
 6. remaining work or limitations
 
 This keeps the repository understandable as an actual project rather than only a collection of source files.
+
+Planned items are kept clearly separate from implemented and tested items so the repository does not overstate project progress.
