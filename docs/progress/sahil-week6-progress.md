@@ -202,3 +202,7 @@ Monitoring component
 Once this is working, the project can be expanded with additional pond networks, more sensors, an attacker/test network, monitoring services and the fail-safe control component.
 
 The purpose of the GNS3 stage is to make the project closer to a real networked IoT environment rather than keeping every component on localhost.
+
+## Documentation note
+
+I am maintaining this file as my individual project documentation. I will keep updating it as I complete further implementation, testing, troubleshooting and GNS3 work.
