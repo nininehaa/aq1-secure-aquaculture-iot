@@ -8,11 +8,23 @@ The documentation is written so that another student, tutor or developer can und
 
 1. [Project overview](project-overview.md) — why the project exists and what problem it solves.
 2. [Team roles](team-roles.md) — who is responsible for each technical area.
-3. [Current architecture](architecture/current-week6-architecture.md) — current working prototype and GNS3 scale-up direction.
-4. [Local demo setup](setup/local-demo-setup.md) — how to reproduce the current secure MQTT temperature demo.
-5. [Project decisions](project-decisions.md) — important technical choices and why they were made.
-6. [Troubleshooting log](troubleshooting.md) — implementation problems, investigation and resolution.
-7. [Project evidence index](evidence-index.md) — where the code, tests, commits and documentation for each project area can be found.
+3. [Implementation status](project-management/implementation-status.md) — single source of truth for what is implemented, tested, in progress or pending.
+4. [Requirements traceability](project-management/requirements-traceability.md) — links requirements to owners, implementation and acceptance evidence.
+5. [Risk register](project-management/risk-register.md) — current technical, delivery and evidence risks.
+6. [Current architecture](architecture/current-week6-architecture.md) — current working prototype and GNS3 scale-up direction.
+7. [Local demo setup](setup/local-demo-setup.md) — how to reproduce the current secure MQTT demo.
+8. [Project decisions](project-decisions.md) — important technical choices and why they were made.
+9. [Troubleshooting log](troubleshooting.md) — implementation problems, investigation and resolution.
+10. [Project evidence index](evidence-index.md) — where code, tests, commits and documentation can be found.
+
+## Project Management and Engineering Control
+
+- [Implementation status](project-management/implementation-status.md)
+- [Requirements and traceability matrix](project-management/requirements-traceability.md)
+- [Risk register](project-management/risk-register.md)
+- [Weekly engineering review template](project-management/weekly-review-template.md)
+
+The project-management files are live engineering records. They should be updated when implementation status, scope, risk, ownership or acceptance evidence changes.
 
 ## Implementation Documentation
 
@@ -39,26 +51,37 @@ The documentation is written so that another student, tutor or developer can und
 - [GNS3 deployment design](gns3/gns3-design.md)
 - [Planned network addressing](gns3/network-addressing.md)
 
-These GNS3 documents are clearly marked as planned/in progress until the virtual network is actually implemented and tested.
+These GNS3 documents must remain marked planned/in progress until the virtual network is actually implemented and tested.
 
 ## Progress Records
 
 - [Week 5 progress](progress/week-5.md)
 - [Week 6 progress](progress/week-6.md)
-- [Sahil Week 6 implementation record](progress/sahil-week6-progress.md)
+
+Individual contribution evidence should be created and committed by the relevant team member, while shared project records should remain factual and team-oriented.
 
 ## Documentation Rule
 
-For each meaningful project change, the team should record:
+For each meaningful project change, record:
 
 1. Why the work was needed.
 2. What was implemented or changed.
 3. How it works.
-4. How it was tested.
-5. What result was observed.
-6. What remains to be done.
+4. How it was configured/run.
+5. How it was tested.
+6. What result was observed.
+7. Where the evidence is located.
+8. What remains to be done.
 
-Code and screenshots are evidence, but the documentation explains the purpose, design and result of that evidence.
+Code and screenshots are evidence, but the documentation explains the purpose, design, implementation and result of that evidence.
+
+## Definition of Done
+
+For this project, **code alone is not implementation evidence**. A feature is complete only when it is:
+
+**built + configured + run + tested + evidenced + documented**.
+
+Where applicable, the requirement should also be linked to a GitHub issue/card, implementation commit/PR and acceptance test.
 
 ## Status Language
 
