@@ -2,38 +2,42 @@
 
 ## Purpose
 
-This file connects the project documentation to the actual code, configuration, tests and Git history. It is intended to make project reviews and demonstrations easier.
+This file connects project documentation to actual code, configuration, tests and Git history so that project reviews and demonstrations can move from a requirement to the corresponding implementation and evidence.
 
 ## Current Implementation Evidence
 
 | Area | Main evidence | Status |
 |---|---|---|
 | Project overview | `README.md`, `docs/project-overview.md` | Current |
+| Implementation status | `docs/project-management/implementation-status.md` | Current source of truth |
+| Requirements traceability | `docs/project-management/requirements-traceability.md` | Current |
+| Risk register | `docs/project-management/risk-register.md` | Live |
 | System architecture | `docs/architecture/system-architecture.md`, `docs/architecture/current-week6-architecture.md` | Current + planned scale-up |
 | Dissolved-oxygen sensor | `scripts/sensors/do_sensor.py`, `docs/implementation/dissolved-oxygen-sensor.md` | Implemented locally |
 | Temperature sensor | `scripts/sensors/temperature_sensor.py`, `docs/implementation/temperature-sensor.md` | Implemented locally |
+| pH sensor | Project scope/design | Pending implementation |
 | Mosquitto broker | `configs/mosquitto/mosquitto.conf`, `docs/implementation/mqtt-broker.md` | Implemented locally |
-| Temperature MQTT authentication | `scripts/sensors/temperature_sensor.py`, Week 6 TC-W6-08 | PASS for tested producer/subscriber flow |
+| Temperature MQTT authentication | sensor/broker implementation and Week 6 authentication test | PASS for tested local flow |
 | DO HMAC generation | `scripts/sensors/do_sensor.py` | Implemented |
 | Temperature HMAC generation | `scripts/sensors/temperature_sensor.py` | Implemented |
-| Monitoring / HMAC verification | `scripts/monitoring/monitor.py`, `docs/implementation/monitoring.md` | Implemented |
+| Monitoring / HMAC verification | `scripts/monitoring/monitor.py`, `docs/implementation/monitoring.md` | Implemented locally |
 | Temperature tamper test | `scripts/security/temperature_tamper_test.py` | Implemented |
-| Sensor outage/recovery | `scripts/monitoring/monitor.py`, Week 6 tests | PASS |
+| Sensor outage/recovery | `scripts/monitoring/monitor.py`, Week 6 tests | PASS locally |
 | SAFE/HOLD control | `docs/implementation/failsafe-controller.md`, Issue #18 | Pending integration |
-| GNS3 deployment | `docs/gns3/gns3-design.md`, Issue #16 | Planned / in progress |
-| GNS3 addressing | `docs/gns3/network-addressing.md` | Planned |
+| GNS3 deployment | `docs/gns3/gns3-design.md`, Issue #16 | In progress |
+| GNS3 addressing | `docs/gns3/network-addressing.md` | Planned until applied to running nodes |
 
 ## Week 6 Test Evidence
 
-The main recorded test file is:
+Primary test record:
 
 `testing/Week_6_Security_Test_Plan.md`
 
-A shorter consolidated summary is available at:
+Consolidated summary:
 
 `testing/security-test-results.md`
 
-Current recorded results include:
+Recorded results include:
 
 - valid DO HMAC — PASS
 - invalid DO HMAC — PASS
@@ -47,88 +51,79 @@ Current recorded results include:
 - tampered temperature reading rejected — PASS
 - SAFE/HOLD activation — PENDING
 
-## Sahil Basnet Evidence
+These are local-prototype results unless the individual test record explicitly states otherwise. GNS3 tests must be recorded separately when the virtualised path is executed.
 
-Sahil's current contribution is documented in:
+## Workstream Evidence
 
-- `docs/progress/sahil-week6-progress.md`
+### Sensor / MQTT / Network Security
+
+Relevant evidence includes:
+
+- `scripts/sensors/`
+- `configs/mosquitto/`
 - `docs/implementation/temperature-sensor.md`
 - `docs/implementation/mqtt-broker.md`
 - `docs/security/temperature-mqtt-security.md`
-- `docs/gns3/gns3-design.md`
-
-Key technical commits include:
-
-- `9a5216d` — authenticated temperature sensor MQTT flow
-- `e98556c` — HMAC protection and temperature tamper test
-- `fa4ac7c` — HMAC integrity protection to temperature sensor
-
-Current Sahil-owned or shared work items include:
-
 - Issue #17 — MQTT authentication, topic standardisation and ACL preparation
-- Issue #16 — GNS3 virtualised AQ-1 topology (shared network-scale work)
+- Issue #16 — shared GNS3 network-scale work
 
-## Neha Thanait Evidence
+### Security Monitoring and Verification
 
-Neha's monitoring/security-validation contribution is represented by:
+Relevant evidence includes:
 
 - `scripts/monitoring/monitor.py`
 - `docs/implementation/monitoring.md`
 - Week 5 and Week 6 monitoring/security tests
 - DO and temperature HMAC verification
-- outage and recovery detection
+- per-sensor outage and recovery detection
 
-## Md Monirul Haque Arnob Evidence
+### Control and Resilience
 
-Arnob's control/resilience area is represented by:
+Relevant evidence includes:
 
 - `docs/implementation/failsafe-controller.md`
 - Issue #18 — SAFE/HOLD fail-safe control
 
-The SAFE/HOLD implementation/test is currently recorded as pending and should only be marked complete after working evidence is committed.
+SAFE/HOLD implementation/test remains pending and must not be marked complete until working evidence is committed.
 
 ## Configuration and Secret Handling Evidence
 
-The repository contains the Mosquitto configuration at:
+Mosquitto configuration:
 
 `configs/mosquitto/mosquitto.conf`
 
-The local password file is intentionally excluded by `.gitignore` and should not be committed.
+Local password/secrets files should not be committed. Sensor/broker credentials and HMAC secrets should be supplied through environment variables or local secret/configuration mechanisms excluded from version control.
 
-The secure temperature sensor reads MQTT credentials and its HMAC secret from environment variables instead of storing them directly in the committed Python source.
+## Project Management Evidence
 
-## Documentation Evidence
+- `docs/project-management/implementation-status.md` — current implementation truth
+- `docs/project-management/requirements-traceability.md` — requirement-to-evidence mapping
+- `docs/project-management/risk-register.md` — live project/security risk register
+- `docs/project-management/weekly-review-template.md` — repeatable weekly engineering review format
+- `docs/project-decisions.md` — architecture/design decisions and reasons
+- GitHub issues / project board — ownership and current work
+- Teams — discussion/decision context where required by the unit workflow
 
-Project documentation is indexed from:
+## Evidence Still Needed
 
-`docs/README.md`
+Add these only after the relevant implementation is actually completed:
 
-Important documentation includes:
+- GNS3 topology screenshots/exported project evidence
+- actual node IP assignments verified from running nodes
+- routing/firewall configuration and connectivity tests
+- MQTT ACL configuration and authorised/unauthorised tests
+- monitoring-client authenticated MQTT test in GNS3
+- packet captures from the routed GNS3 path
+- pH sensor implementation and security tests
+- SAFE/HOLD implementation, activation and recovery evidence
+- Node-RED/dashboard screenshots or exported flows if implemented
+- TLS configuration and verification if implemented
+- resilience/failover evidence if a backup broker becomes part of the tested scope
 
-- project overview
-- team roles
-- architecture
-- implementation guides
-- security design and threat model
-- project decisions
-- troubleshooting log
-- setup instructions
-- weekly progress
-- test plans/results
-- GNS3 design and addressing
+## Evidence Rule
 
-## Evidence Still Needed Later
+A screenshot without context is not enough, and code without execution is not enough. Each important feature should be traceable through:
 
-The following evidence should be added when those stages are actually completed:
+`requirement -> owner/issue -> code/config -> running implementation -> test -> actual result -> evidence`
 
-- GNS3 topology screenshots/files
-- actual GNS3 IP assignments
-- firewall configuration and tests
-- MQTT ACL configuration and tests
-- monitoring-client authenticated MQTT test
-- TLS configuration and packet capture
-- Node-RED/control screenshots or exported flows
-- SAFE/HOLD test evidence
-- primary/backup broker resilience test
-
-The project should not mark these items as completed until actual implementation and test evidence exists.
+Planned features must remain marked **Planned/Pending** until that chain exists.
