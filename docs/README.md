@@ -85,14 +85,16 @@ The project-management files are live engineering records. When implementation s
 
 - [GNS3 deployment design](gns3/gns3-design.md)
 - [Planned network addressing](gns3/network-addressing.md)
+- [Week 7 TEMP-001 to monitor validation](gns3/week7-temp-monitor-validation.md)
 
-These GNS3 documents describe design/scale-up work. The **first required practical milestone remains the one-Pond-A routed path** defined in the current project plan.
+These GNS3 documents distinguish planned scale-up from demonstrated runtime evidence. The **first required practical milestone remains the one-Pond-A routed path** defined in the current project plan.
 
 ## Progress Records
 
 - [Week 5 progress](progress/week-5.md)
 - [Week 6 progress](progress/week-6.md)
 - [Week 7 progress](progress/week-7.md)
+- [Neha Week 7 individual technical progress](progress/neha-week7-individual-progress.md)
 - [Week 8 progress and priorities](progress/week-8.md)
 
 Weekly records should continue in this folder so the repository shows sustained development and clearly separates actual technical progress from planning/documentation work.
