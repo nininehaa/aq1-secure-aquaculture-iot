@@ -11,54 +11,104 @@ Coral Coast Aquaculture
 ## Project Scenario
 AQ-1 — IoT/Sensor Security for a Prawn and Barramundi Farm
 
-## Project Overview
-This project is building a simulated secure aquaculture IoT system for dissolved oxygen, temperature and other farm sensor readings.
+## Project Goal
+This project is building a secure and resilient aquaculture IoT sensor-control system that protects sensor identity, message integrity, trusted-data availability and safe control behaviour.
 
-The target system protects sensor identity, message integrity and service availability so that false, modified or missing sensor data does not blindly trigger unsafe control behaviour.
+The project scope includes three main sensor types:
 
-## Current Prototype Status
+- dissolved oxygen (DO)
+- temperature
+- pH
 
-Implemented in the repository:
+The current local prototype has working DO and temperature paths. The pH path is still pending implementation/testing.
 
-- Python dissolved-oxygen and temperature sensor simulation
+## Main Implementation Target (MVP)
+
+The immediate target is **one secure Pond A deployment in GNS3**, not three complete ponds.
+
+```text
+Pond A sensor endpoints
+(DO + Temperature + pH)
+          |
+          v
+Pond A virtual network
+          |
+          v
+Router / Firewall
+          |
+          v
+Mosquitto MQTT broker
+          |
+          v
+Security monitoring / trust validation
+          |
+          v
+SAFE/HOLD control
+```
+
+The first GNS3 milestone may start with the existing `TEMP-001` path and then add the remaining Pond A sensor paths.
+
+The current Python producers are the local security-prototype/test baseline. The final project should move the working security path onto separated GNS3 nodes/endpoints so the result is not only a localhost sensor simulation.
+
+For the full delivery order, ownership and acceptance criteria, see the [current project plan](docs/project-management/project-plan.md).
+
+## Current Working Prototype
+
+Implemented/tested locally in the repository:
+
+- dissolved-oxygen and temperature producer paths
 - Eclipse Mosquitto MQTT messaging
 - authenticated MQTT path for temperature sensor `TEMP-001`
-- anonymous MQTT access disabled on the current secure broker configuration
-- HMAC-SHA256 integrity generation for DO and temperature readings
-- HMAC verification for dissolved-oxygen and temperature readings
+- anonymous MQTT access disabled in the current secure broker configuration
+- HMAC-SHA256 generation for DO and temperature readings
+- HMAC verification for DO and temperature readings
 - controlled temperature tamper-test client
-- rejection of tampered sensor messages by the monitoring logic
+- malformed/tampered message rejection
 - independent sensor outage and recovery monitoring
-- Week 6 security test plan and recorded results
-- technical decision, troubleshooting, setup, implementation and security documentation
+- Week 6 security tests and recorded results
+- technical/security/project documentation
 
 Current integration work still includes:
 
 - MQTT authentication support for the monitoring client
 - standardised MQTT topic structure and topic ACLs
+- pH implementation and security tests
 - `SAFE/HOLD` fail-safe controller integration
-- Node-RED/dashboard integration
-- TLS and stronger key management
-- GNS3 multi-pond network deployment and packet-capture testing
+- first routed GNS3 Pond A deployment
+- GNS3/Wireshark network evidence
 
 ## Current Data Flow
 
 ```text
-Sensor simulator
-      |
-      | MQTT + integrity-protected message
-      v
+Local DO / Temperature prototype
+          |
+          v
 Mosquitto MQTT broker
-      |
-      v
-Security monitoring / verification
-      |
-      v
-Trusted or rejected sensor state
-      |
-      v
+          |
+          v
+Security monitoring / HMAC verification
+          |
+          v
+Trusted / rejected / outage state
+          |
+          v
 SAFE/HOLD control integration (pending)
 ```
+
+## Stretch / Scale-Up Direction
+
+Only after the one-Pond-A MVP is stable, the design may be expanded with:
+
+- Pond B and Pond C
+- backup MQTT broker
+- larger attacker/test network
+- additional sensor/feeder identities
+- broader Node-RED dashboard/control functionality
+- TLS and stronger key management
+- broker failover/redundancy tests
+- larger scale/load tests
+
+These are **future scale-up/stretch goals**, not the immediate first GNS3 requirement.
 
 ## Main Technologies
 
@@ -68,64 +118,50 @@ SAFE/HOLD control integration (pending)
 - GitHub and GitHub Projects
 - Microsoft Teams
 - Wireshark
-- GNS3 for planned network-scale deployment
+- GNS3
 - Node-RED for planned monitoring/control integration
 
 ## Team Technical Focus
 
-- **Sahil Basnet:** sensor/MQTT/network security, temperature producer, broker authentication, HMAC generation, tamper testing, GNS3 network scale-up
-- **Neha Thanait:** sensor trust validation, HMAC verification, outage/recovery monitoring, security logging/alerts
-- **Md Monirul Haque Arnob:** control/resilience integration, `SAFE/HOLD`, Node-RED and simulated actuator behaviour
+- **Sahil Basnet:** sensor/MQTT/network security, temperature producer, broker authentication, HMAC generation, MQTT ACL/topic work, GNS3 network integration
+- **Neha Thanait:** sensor trust validation, HMAC verification, outage/recovery monitoring, security logging/alerts and acceptance/security testing
+- **Md Monirul Haque Arnob:** control/resilience integration, `SAFE/HOLD`, Node-RED/control integration and virtual actuator behaviour
 
-## Documentation
+## Where to Start in the Documentation
 
-Start with the [project documentation index](docs/README.md).
-
-Key documents:
-
-- [Project overview](docs/project-overview.md)
-- [Team roles and ownership](docs/team-roles.md)
-- [Project evidence index](docs/evidence-index.md)
-- [Current Week 6 architecture and GNS3 direction](docs/architecture/current-week6-architecture.md)
-- [Local demo setup guide](docs/setup/local-demo-setup.md)
-- [Project decision log](docs/project-decisions.md)
-- [Troubleshooting log](docs/troubleshooting.md)
-- [Security design](docs/security/security-design.md)
-- [Dissolved-oxygen sensor implementation](docs/implementation/dissolved-oxygen-sensor.md)
-- [Temperature sensor implementation](docs/implementation/temperature-sensor.md)
-- [MQTT broker and authentication](docs/implementation/mqtt-broker.md)
-- [Monitoring and trust verification](docs/implementation/monitoring.md)
-- [Fail-safe controller status/design](docs/implementation/failsafe-controller.md)
-- [Security threat model](docs/security/threat-model.md)
-- [Temperature MQTT security design](docs/security/temperature-mqtt-security.md)
-- [Week 5 progress](docs/progress/week-5.md)
-- [Week 6 progress](docs/progress/week-6.md)
-- [Sahil Week 6 implementation progress](docs/progress/sahil-week6-progress.md)
-- [Week 6 security test plan](testing/Week_6_Security_Test_Plan.md)
-- [Consolidated security test results](testing/security-test-results.md)
-- [GNS3 deployment design](docs/gns3/gns3-design.md)
-- [Planned GNS3 addressing](docs/gns3/network-addressing.md)
+1. [Current project plan](docs/project-management/project-plan.md) — what we are building, in what order, and MVP vs stretch
+2. [Implementation status](docs/project-management/implementation-status.md) — what actually works today
+3. [Team roles and ownership](docs/team-roles.md) — who owns each technical area
+4. [Documentation index](docs/README.md) — all supporting documentation
+5. [Requirements traceability](docs/project-management/requirements-traceability.md) — requirement-to-implementation/test mapping
+6. [Security test results](testing/security-test-results.md) — recorded security testing
 
 ## Demonstration Goals
 
-1. An authorised sensor publishes a valid reading.
-2. An authorised subscriber/monitor receives the reading.
-3. A client without valid MQTT credentials is rejected.
-4. A tampered sensor message fails integrity verification.
-5. A sensor outage is detected independently.
-6. The integrated control system ultimately enters `SAFE/HOLD` when trusted data is unavailable or invalid.
+For the MVP, the team should ultimately demonstrate:
 
-## Documentation Approach
+1. a sensor endpoint communicating across the routed GNS3 Pond A path
+2. valid MQTT credentials accepted and missing/incorrect credentials rejected
+3. a valid HMAC-protected reading accepted
+4. a tampered reading rejected
+5. a required sensor outage detected independently
+6. `SAFE/HOLD` activated when trusted data is unavailable or invalid
+7. controlled recovery when valid trusted data returns
+8. GNS3/Wireshark evidence showing the actual network path
 
-For each meaningful implementation change the team records:
+## Documentation Rule
+
+For each meaningful implementation change, record:
 
 1. why the work was needed
-2. what was implemented
+2. what was implemented or changed
 3. how it works
-4. how it was tested
-5. the observed result
-6. remaining work or limitations
+4. how it was configured/run
+5. how it was tested
+6. the observed result
+7. where the evidence is located
+8. what remains
 
-This keeps the repository understandable as an actual project rather than only a collection of source files.
+A feature is complete only when it is **built + configured + run + tested + evidenced + documented**.
 
-Planned items are kept clearly separate from implemented and tested items so the repository does not overstate project progress.
+Planned and stretch items must remain clearly marked so the repository does not overstate project progress.
