@@ -61,6 +61,12 @@ These should remain marked **Planned** or **In progress** until implemented and 
 
 The project-management files are live engineering records. When implementation status, scope, risk, ownership or acceptance evidence changes, update the appropriate existing record rather than creating a competing version of the plan.
 
+## Design Documentation
+
+- [Monitoring and trust-validation design — Neha](design/monitoring-trust-validation-design.md)
+
+Each major technical workstream should have a design document that explains intended behaviour, interfaces, normal and failure flows, security controls, design decisions, assumptions/limitations and acceptance criteria. Design documentation should be linked to the corresponding implementation and test evidence.
+
 ## Implementation Documentation
 
 - [Dissolved-oxygen sensor](implementation/dissolved-oxygen-sensor.md)
