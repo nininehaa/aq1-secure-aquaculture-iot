@@ -63,6 +63,7 @@ The project-management files are live engineering records. When implementation s
 
 ## Design Documentation
 
+- [Sensor, MQTT and network-security design — Sahil](design/sensor-mqtt-network-security-design.md)
 - [Monitoring and trust-validation design — Neha](design/monitoring-trust-validation-design.md)
 
 Each major technical workstream should have a design document that explains intended behaviour, interfaces, normal and failure flows, security controls, design decisions, assumptions/limitations and acceptance criteria. Design documentation should be linked to the corresponding implementation and test evidence.
