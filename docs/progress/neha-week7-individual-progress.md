@@ -26,6 +26,16 @@ Arnob: SAFE/HOLD / control resilience
 
 Each member is expected to build and demonstrate their own technical component, then the team will integrate the components into the final Pond A GNS3 system.
 
+## My design documentation
+
+My monitoring component has a separate design document:
+
+- `docs/design/monitoring-trust-validation-design.md`
+
+That document explains the intended monitoring flow, MQTT inputs, HMAC verification, trust boundary, outage/recovery state logic, normal and attack/failure behaviour, interfaces with the SAFE/HOLD controller, design decisions, limitations and acceptance criteria. It also contains diagrams showing the monitoring flow, GNS3 validation architecture, sequence of message verification and outage/recovery state transitions.
+
+This design documentation is separate from the implementation and runtime evidence below.
+
 ## What I personally worked on in Week 7
 
 During Week 7 I moved my monitoring and trust-validation work from the local prototype into my own GNS3 environment and tested it across separate virtual nodes.
@@ -145,8 +155,9 @@ The purpose of this environment was to independently prove my monitoring/securit
 
 ## Evidence of my individual work
 
-### Main implementation files
+### Main design and implementation files
 
+- `docs/design/monitoring-trust-validation-design.md`
 - `scripts/monitoring/monitor.py`
 - `docs/implementation/monitoring.md`
 - `docs/gns3/week7-temp-monitor-validation.md`
@@ -169,6 +180,15 @@ Screenshots were captured showing:
 - temperature outage alert
 - recovery alert
 - tampered reading rejected with HMAC verification failure
+
+Recommended screenshot evidence to retain for tutor review:
+
+1. GNS3 topology showing the three separate test nodes
+2. monitor connected/subscribed to the GNS3 broker
+3. valid temperature HMAC accepted
+4. outage alert after the sensor stops
+5. recovery alert after the sensor restarts
+6. tamper publisher and monitor rejection shown together
 
 Screenshots containing HMAC secrets or credentials should not be committed.
 
@@ -232,4 +252,4 @@ My next tasks are:
 
 If asked what I personally did, I can explain it as:
 
-> My individual part is security monitoring and trust validation. In Week 7 I built my own GNS3 validation environment and deployed my monitor on a separate Linux node. I also used temporary temperature and Mosquitto support nodes so I could independently test my component. My monitor accepted valid HMAC readings, rejected a tampered reading, detected an outage after 10 seconds and detected recovery when the sensor returned. The temporary sensor and broker were only used to test my monitor. Later my monitoring component will be integrated with Sahil's secured broker/network work and Arnob's SAFE/HOLD control work.
+> My individual part is security monitoring and trust validation. In Week 7 I built my own GNS3 validation environment and deployed my monitor on a separate Linux node. I also used temporary temperature and Mosquitto support nodes so I could independently test my component. My monitor accepted valid HMAC readings, rejected a tampered reading, detected an outage after 10 seconds and detected recovery when the sensor returned. I also documented the design of my monitoring component, including its verification flow, trust boundary, outage/recovery logic and interface to the future SAFE/HOLD controller. The temporary sensor and broker were only used to test my monitor. Later my monitoring component will be integrated with Sahil's secured broker/network work and Arnob's SAFE/HOLD control work.
