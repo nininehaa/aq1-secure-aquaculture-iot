@@ -2,29 +2,64 @@
 
 This folder contains the working documentation for the Coral Coast Aquaculture secure IoT project.
 
-The documentation is written so that another student, tutor or developer can understand what the team is building, what has already been implemented, how it was tested, what problems were found, and what is still planned.
+The documentation is organised so the team, tutor and reviewers can quickly answer four questions:
+
+1. What are we building?
+2. What actually works now?
+3. Who owns each technical area?
+4. What remains before the final demo?
 
 ## Start Here
 
-1. [Project overview](project-overview.md) — why the project exists and what problem it solves.
-2. [Team roles](team-roles.md) — who is responsible for each technical area.
-3. [Implementation status](project-management/implementation-status.md) — single source of truth for what is implemented, tested, in progress or pending.
-4. [Requirements traceability](project-management/requirements-traceability.md) — links requirements to owners, implementation and acceptance evidence.
-5. [Risk register](project-management/risk-register.md) — current technical, delivery and evidence risks.
-6. [Current architecture](architecture/current-week6-architecture.md) — current working prototype and GNS3 scale-up direction.
-7. [Local demo setup](setup/local-demo-setup.md) — how to reproduce the current secure MQTT demo.
-8. [Project decisions](project-decisions.md) — important technical choices and why they were made.
-9. [Troubleshooting log](troubleshooting.md) — implementation problems, investigation and resolution.
-10. [Project evidence index](evidence-index.md) — where code, tests, commits and documentation can be found.
+Read these in this order:
+
+1. [Current project plan](project-management/project-plan.md) — **main delivery plan**, including one-Pond-A MVP, ownership, delivery order and stretch goals.
+2. [Implementation status](project-management/implementation-status.md) — **single source of truth for what actually works today**.
+3. [Team roles](team-roles.md) — who is responsible for each technical workstream.
+4. [Project overview](project-overview.md) — business problem, security goal and prototype background.
+5. [Requirements traceability](project-management/requirements-traceability.md) — requirement-to-owner-to-implementation/test/evidence mapping.
+6. [Risk register](project-management/risk-register.md) — current technical, delivery and evidence risks.
+7. [Current Week 6 architecture](architecture/current-week6-architecture.md) — historical/current-prototype architecture plus the documented scale-up direction.
+8. [Local demo setup](setup/local-demo-setup.md) — how to reproduce the current local secure MQTT demo.
+9. [Project decisions](project-decisions.md) — important technical choices and why they were made.
+10. [Troubleshooting log](troubleshooting.md) — implementation problems, investigation and resolution.
+11. [Project evidence index](evidence-index.md) — where code, tests, commits and documentation can be found.
+
+## Important Scope Clarification
+
+The current project plan separates the **MVP** from **future scale-up**.
+
+### Immediate MVP
+
+The immediate implementation target is **one Pond A GNS3 path** using the project sensor scope of dissolved oxygen, temperature and pH.
+
+The current local prototype already has working DO and temperature paths. The pH path remains to be implemented/tested.
+
+The first routed GNS3 milestone may begin with `TEMP-001` and then expand the Pond A implementation.
+
+### Future scale-up / stretch
+
+The following are not the immediate first GNS3 requirement:
+
+- Pond B and Pond C
+- backup MQTT broker
+- larger attacker/test network
+- extra feeder/sensor identities
+- advanced Node-RED dashboard features
+- TLS/stronger key management
+- broker failover/redundancy and larger-scale load tests
+
+These should remain marked **Planned** or **In progress** until implemented and evidenced.
 
 ## Project Management and Engineering Control
 
+- [Current project plan](project-management/project-plan.md)
 - [Implementation status](project-management/implementation-status.md)
 - [Requirements and traceability matrix](project-management/requirements-traceability.md)
 - [Risk register](project-management/risk-register.md)
 - [Weekly engineering review template](project-management/weekly-review-template.md)
 
-The project-management files are live engineering records. They should be updated when implementation status, scope, risk, ownership or acceptance evidence changes.
+The project-management files are live engineering records. When implementation status, scope, risk, ownership or acceptance evidence changes, update the appropriate existing record rather than creating a competing version of the plan.
 
 ## Implementation Documentation
 
@@ -46,17 +81,19 @@ The project-management files are live engineering records. They should be update
 - [Consolidated security test results](../testing/security-test-results.md)
 - [Week 5 Test Plan](../testing/week5_test_plan.md)
 
-## GNS3 Network Scale-Up
+## GNS3 Network Work
 
 - [GNS3 deployment design](gns3/gns3-design.md)
 - [Planned network addressing](gns3/network-addressing.md)
 
-These GNS3 documents must remain marked planned/in progress until the virtual network is actually implemented and tested.
+These GNS3 documents describe design/scale-up work. The **first required practical milestone remains the one-Pond-A routed path** defined in the current project plan.
 
 ## Progress Records
 
 - [Week 5 progress](progress/week-5.md)
 - [Week 6 progress](progress/week-6.md)
+
+Future weekly progress records should continue in this folder so the project shows sustained development rather than only a one-time documentation update.
 
 Individual contribution evidence should be created and committed by the relevant team member, while shared project records should remain factual and team-oriented.
 
@@ -85,7 +122,7 @@ Where applicable, the requirement should also be linked to a GitHub issue/card, 
 
 ## Status Language
 
-To keep the project honest and easy to review, documentation should use clear status labels:
+Use the following consistently:
 
 - **Implemented** — working code/configuration exists.
 - **Tested / PASS** — a recorded test was performed successfully.
@@ -93,4 +130,4 @@ To keep the project honest and easy to review, documentation should use clear st
 - **Planned** — design or future work only.
 - **Pending** — required work/test has not yet been completed.
 
-This prevents planned features from being mistaken for finished implementation.
+This prevents future architecture or stretch goals from being mistaken for finished implementation.
