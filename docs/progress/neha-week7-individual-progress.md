@@ -6,9 +6,29 @@
 
 My responsibility is to make sure sensor data is checked before the system trusts it. My work focuses on verifying HMAC-protected sensor messages, rejecting tampered or malformed data, detecting sensor outages and recovery, logging security events, and proving these behaviours through tests.
 
+## Important ownership clarification
+
+During Week 7 I built my **own GNS3 validation environment** so I could independently deploy and test my monitoring and trust-validation component.
+
+My GNS3 environment included temporary support nodes for a temperature producer and Mosquitto broker because my monitor needed a live sensor source and broker in order to be tested properly. These support nodes were used to validate my monitoring work and do **not** mean that I am taking ownership of Sahil's final sensor/broker/network-security workstream.
+
+The final group implementation is intended to integrate the three individual technical workstreams:
+
+```text
+Sahil: secured sensor / MQTT / network path
+                 |
+                 v
+Neha: monitoring / trust validation / security testing
+                 |
+                 v
+Arnob: SAFE/HOLD / control resilience
+```
+
+Each member is expected to build and demonstrate their own technical component, then the team will integrate the components into the final Pond A GNS3 system.
+
 ## What I personally worked on in Week 7
 
-During Week 7 I moved my monitoring and trust-validation work from the local prototype into GNS3 and tested it across separate virtual nodes.
+During Week 7 I moved my monitoring and trust-validation work from the local prototype into my own GNS3 environment and tested it across separate virtual nodes.
 
 ### 1. Built my separate GNS3 monitoring node
 
@@ -27,7 +47,19 @@ I installed and configured:
 
 I validated that `monitor.py` compiled without a Python syntax error and confirmed that the MQTT Python library loaded successfully.
 
-### 2. Connected my monitor to a separate GNS3 Mosquitto broker
+### 2. Built temporary support nodes for my validation environment
+
+To test my monitoring component independently, I also created temporary support nodes in the same GNS3 project:
+
+- `AQ1-TEMP-001-1` — test temperature producer
+- `AQ1-Mosquitto-Broker-1` — test MQTT broker
+- `Switch1` and `NAT3` — temporary connectivity/setup support
+
+These nodes allowed me to generate real MQTT traffic and security events for my monitoring component.
+
+They are not presented as the completed final team topology. Sahil's network/broker-security workstream will later provide the secured broker, routing/segmentation, authentication and ACL controls for the integrated system.
+
+### 3. Connected my monitor to the separate GNS3 Mosquitto broker
 
 The monitor was changed from using only `localhost` to using the broker address supplied through the `AQ1_MQTT_BROKER` environment variable.
 
@@ -42,9 +74,9 @@ and subscribed to:
 
 This proved that my monitoring component could operate from its own GNS3 Linux node rather than only from the original local Windows environment.
 
-### 3. Verified valid temperature HMAC messages across GNS3
+### 4. Verified valid temperature HMAC messages across GNS3
 
-A separate `AQ1-TEMP-001-1` node published HMAC-protected temperature readings through the Mosquitto broker.
+The temporary `AQ1-TEMP-001-1` support node published HMAC-protected temperature readings through the test Mosquitto broker.
 
 My monitor received the messages and accepted them only after successful HMAC verification.
 
@@ -54,7 +86,7 @@ Observed result:
 
 **Result: PASS**
 
-### 4. Tested temperature sensor outage detection across GNS3
+### 5. Tested temperature sensor outage detection across GNS3
 
 I stopped the running temperature producer while keeping my monitoring node active.
 
@@ -66,7 +98,7 @@ This confirmed that the per-sensor outage logic still worked when the sensor and
 
 **Result: PASS**
 
-### 5. Tested recovery detection across GNS3
+### 6. Tested recovery detection across GNS3
 
 I restarted the temperature producer after the outage.
 
@@ -78,7 +110,7 @@ and then resumed accepting valid signed readings.
 
 **Result: PASS**
 
-### 6. Tested tampered temperature rejection across GNS3
+### 7. Tested tampered temperature rejection across GNS3
 
 I used the controlled temperature tamper-test flow. The test created a valid HMAC for an original temperature reading, then modified the temperature value and status without recalculating the HMAC.
 
@@ -92,22 +124,24 @@ Observed result:
 
 The invalid message did not reset the sensor health timer. This is intentional because invalid or forged data should not make a failed sensor appear healthy.
 
-## My current GNS3 security flow
+## My Week 7 GNS3 validation environment
 
 ```text
-AQ1-TEMP-001-1
+AQ1-TEMP-001-1          temporary test producer
       |
       v
-AQ1-Mosquitto-Broker-1
+AQ1-Mosquitto-Broker-1  temporary test broker
       |
       v
-Neha-Monitor-1
+Neha-Monitor-1          my main technical component
       |
       +--> valid signed reading -> ACCEPTED
       +--> tampered reading -> REJECTED
       +--> no valid reading > 10 seconds -> OUTAGE ALERT
       +--> valid reading returns -> RECOVERY
 ```
+
+The purpose of this environment was to independently prove my monitoring/security component before final team integration.
 
 ## Evidence of my individual work
 
@@ -128,7 +162,7 @@ Neha-Monitor-1
 
 Screenshots were captured showing:
 
-- `Neha-Monitor-1` running in GNS3
+- my `Neha-Monitor-1` node running in GNS3
 - `monitor.py` present and passing syntax validation
 - successful monitor-to-broker connection
 - valid `TEMP-001` readings accepted with `HMAC: VALID`
@@ -140,48 +174,62 @@ Screenshots containing HMAC secrets or credentials should not be committed.
 
 ## What I did not claim
 
-The Week 7 GNS3 test used a temporary flat switch/NAT path and a broker listener with anonymous access enabled for connectivity testing.
+My Week 7 GNS3 validation environment used a temporary flat switch/NAT path and a test broker listener with anonymous access enabled for connectivity testing.
 
-Therefore I am **not** claiming that the following are complete yet:
+Therefore I am **not** claiming that the following team-level tasks are complete yet:
 
-- GNS3 broker authentication enforcement
-- authenticated monitoring client
+- final GNS3 broker authentication enforcement
+- final authenticated monitoring client
 - topic ACLs
 - final Pond A router/firewall topology
+- final routing/segmentation
 - Wireshark packet-capture evidence
 - pH path
-- DO migration into GNS3
+- DO migration into the final GNS3 path
 - SAFE/HOLD controller integration
 
-These remain Week 8 and later integration tasks.
+These remain Week 8 and later individual/integration tasks.
 
 ## How my work connects to the team
 
-### Sahil Basnet
+### Sahil Basnet — Sensor, Broker and Network Security
 
-Sahil's sensor/MQTT/network-security work provides the producer, broker-security and network side that my monitor consumes and verifies.
+Sahil's technical workstream is responsible for the secured sensor/MQTT/network side, including broker hardening, authentication, ACLs, routing/segmentation and network-security evidence. My temporary broker/sensor nodes were only support infrastructure for testing my monitor.
 
-### Md Monirul Haque Arnob
+### Neha Thanait — Monitoring and Trust Validation
 
-Arnob's SAFE/HOLD controller should consume trusted/invalid/outage state after verification so unsafe control decisions are not made from untrusted raw MQTT data.
+My component receives sensor traffic after it reaches MQTT and decides whether the data can be trusted. I verify HMAC integrity, reject invalid/tampered readings, and detect trusted-data outage/recovery conditions.
 
-### End-to-end relationship
+### Md Monirul Haque Arnob — Control and Resilience
 
-`Sahil sensor/MQTT/network -> Neha monitoring/trust validation -> Arnob SAFE/HOLD/control`
+Arnob's SAFE/HOLD controller should consume trusted/invalid/outage state after my verification stage so unsafe control decisions are not made from untrusted raw MQTT data.
 
-## My next technical work
+### Final integration relationship
+
+```text
+Sahil secured sensor/network/broker
+              |
+              v
+Neha monitoring/trust validation
+              |
+              v
+Arnob SAFE/HOLD/control
+```
+
+## Week 8 individual next work
 
 My next tasks are:
 
-1. retest the monitoring path after broker authentication is enabled in GNS3
-2. authenticate the monitoring client
-3. repeat valid/tampered/outage/recovery tests on the final routed Pond A path
-4. capture network/Wireshark evidence
-5. validate DO in GNS3 when its node/path is added
-6. integrate my trusted/outage output with Arnob's SAFE/HOLD controller
+1. keep developing/testing my own monitoring GNS3 environment
+2. add monitoring-client authentication when the secured broker configuration is available
+3. repeat valid/tampered/outage/recovery tests against the authenticated broker
+4. perform security acceptance testing on the final routed Pond A integration path
+5. capture monitoring-related network/Wireshark evidence
+6. validate DO through my monitoring component when the integrated DO path is available
+7. connect my trusted/outage output to Arnob's SAFE/HOLD component during final integration
 
 ## Simple explanation for mentoring
 
 If asked what I personally did, I can explain it as:
 
-> My part is security monitoring and trust validation. I moved my monitor into a separate GNS3 Linux node and connected it to a separate Mosquitto broker. I tested valid HMAC-protected temperature readings, tampered readings, sensor outage and recovery. Valid readings were accepted, tampered readings were rejected, stopping the sensor caused an outage alert after 10 seconds, and restarting it produced a recovery alert. My next step is to repeat these tests with GNS3 MQTT authentication, ACLs, the routed Pond A network and later SAFE/HOLD integration.
+> My individual part is security monitoring and trust validation. In Week 7 I built my own GNS3 validation environment and deployed my monitor on a separate Linux node. I also used temporary temperature and Mosquitto support nodes so I could independently test my component. My monitor accepted valid HMAC readings, rejected a tampered reading, detected an outage after 10 seconds and detected recovery when the sensor returned. The temporary sensor and broker were only used to test my monitor. Later my monitoring component will be integrated with Sahil's secured broker/network work and Arnob's SAFE/HOLD control work.
