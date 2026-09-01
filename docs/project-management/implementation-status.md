@@ -16,40 +16,67 @@
 
 | Component | Current status | Working evidence | Remaining work |
 |---|---|---|---|
-| Dissolved-oxygen sensor simulator | Implemented / Tested | `scripts/sensors/do_sensor.py`; Week 6 security tests | Move into the final GNS3 path and capture network evidence |
-| Temperature sensor simulator | Implemented / Tested locally | `scripts/sensors/temperature_sensor.py`; temperature HMAC/tamper tests | Move into the final GNS3 path and retest across the virtual network |
-| pH sensor simulator | Pending | Project scope/design only | Implement producer, identity, message format and tests |
-| Mosquitto MQTT broker | Implemented locally | `configs/mosquitto/mosquitto.conf`; authentication test evidence | Deploy as a GNS3 service node; finish topic ACLs; authenticate monitoring client |
-| HMAC-SHA256 message integrity | Implemented / Tested | DO and temperature signing/verification tests | Standardise message format and key handling across all sensor types |
-| Security monitoring | Implemented locally / Tested | `scripts/monitoring/monitor.py`; HMAC rejection and outage/recovery tests | Run on a separate GNS3 node and receive MQTT across the virtual network |
-| Per-sensor outage/recovery detection | Implemented / Tested | Week 6 tests | Repeat test in GNS3 with one sensor stopped while another remains active |
+| Dissolved-oxygen sensor simulator | Implemented / Tested locally | `scripts/sensors/do_sensor.py`; Week 6 security tests | Move into the Pond A GNS3 path and capture network evidence |
+| Temperature sensor | Implemented / Tested in GNS3 | `scripts/sensors/temperature_sensor.py`; `docs/gns3/week8-temp-monitor-validation.md` | Retest after broker authentication/ACL hardening and final routed topology are added |
+| pH sensor | Pending | Project scope/design only | Implement producer, identity, message format and tests |
+| Mosquitto MQTT broker | Implemented in GNS3 / connectivity tested | Separate GNS3 broker node at test address `192.168.42.130`; `docs/gns3/week8-temp-monitor-validation.md` | Restore/enforce broker authentication in GNS3; authenticate monitor; finish topic ACLs; move to final routed topology |
+| HMAC-SHA256 message integrity | Implemented / Tested locally and temperature tested in GNS3 | DO and temperature signing/verification tests; GNS3 temperature tamper rejection | Standardise message format/key handling across all sensor types |
+| Security monitoring | Implemented / Tested in GNS3 for temperature path | Separate `Neha-Monitor-1` node; `monitor.py`; valid/tamper/outage/recovery GNS3 results | Authenticate monitoring client; add final routed/network and packet-capture evidence; validate DO/pH paths |
+| Per-sensor outage/recovery detection | Implemented / Tested in GNS3 for TEMP-001 | TEMP-001 stop -> outage after 10 seconds -> restart -> recovery | Repeat with full Pond A sensor set and verify one sensor cannot mask another |
 | SAFE/HOLD controller | Pending integration | `docs/implementation/failsafe-controller.md`; Issue #18 | Build controller, consume trusted/outage state, demonstrate activation and recovery |
-| GNS3 routed deployment | In progress | `docs/gns3/gns3-design.md`; `docs/gns3/network-addressing.md`; Issue #16 | Build nodes, addressing, routing/firewall, live MQTT path and packet capture |
+| GNS3 Pond A deployment | In progress — first virtualised slice working | Separate TEMP-001, Mosquitto and monitor nodes connected through GNS3 switch; `docs/gns3/week8-temp-monitor-validation.md` | Replace temporary flat switch/NAT path with planned routed Pond A/router-firewall path; add DO/pH; capture traffic |
+| MQTT broker authentication in GNS3 | Pending hardening | Local authenticated broker evidence exists; GNS3 test used temporary anonymous listener | Re-enable credentials in GNS3; verify valid credentials accepted and missing/incorrect credentials rejected; authenticate monitor |
 | MQTT topic ACLs | In progress | Issue #17; broker security design | Implement and test authorised/unauthorised topic access |
-| Attacker/test node | Planned | Threat model and GNS3 design | Add test node and demonstrate rejected credentials/spoof/tamper attempts |
+| Attacker/test node | Planned | Threat model and GNS3 design | Add test node if needed and demonstrate rejected credentials/spoof/tamper attempts |
 | Packet capture / Wireshark evidence | Pending | Planned test evidence | Capture traffic from the actual GNS3 path and link captures/screenshots to test cases |
 | Node-RED/dashboard | Planned | Architecture documentation | Build only after core GNS3 security path and SAFE/HOLD integration are stable |
 | TLS | Planned | Security design | Configure and verify later; do not mark implemented until packet capture confirms it |
 
 ## Current Working End-to-End Slice
 
-The strongest implemented slice at present is:
+The strongest demonstrated virtualised slice is now:
 
-`DO / Temperature simulator -> Mosquitto MQTT -> security monitor -> trusted/rejected/outage decision`
+```text
+TEMP-001 GNS3 node
+      |
+      v
+Mosquitto GNS3 broker
+      |
+      v
+Neha-Monitor-1 GNS3 node
+      |
+      +--> valid HMAC -> ACCEPTED
+      +--> sensor stopped -> OUTAGE ALERT
+      +--> valid sensor returns -> RECOVERY
+      +--> tampered payload -> REJECTED
+```
 
-This slice currently runs as a local prototype. The next implementation milestone is to reproduce at least one complete sensor-to-monitor path across separate GNS3 nodes.
+This is the first working GNS3 sensor-to-monitor security slice. It currently uses a temporary flat GNS3 switch/NAT network for integration testing rather than the final routed Pond A/router-firewall design.
 
-## Next Acceptance Milestone
+## GNS3 Validation Result
 
-The team can mark the first GNS3 milestone **Tested / PASS** only when all of the following are demonstrated:
+The following have been demonstrated for TEMP-001 across separate GNS3 nodes:
 
-1. A sensor runs on a separate GNS3 node or endpoint.
-2. The sensor reaches Mosquitto across the virtual network using its assigned IP path.
-3. Correct MQTT credentials are accepted and incorrect credentials are rejected.
-4. A signed reading reaches the monitoring node.
-5. The monitoring node validates a correct HMAC and rejects a tampered HMAC.
-6. Stopping the sensor causes that specific sensor to enter outage state without another sensor masking the failure.
-7. Terminal output, configuration, IP information and packet-capture evidence are committed or linked.
+1. TEMP-001 publishes through the virtual network to a separate Mosquitto broker.
+2. The monitoring node connects to the separate broker on TCP port 1883 and subscribes to project topics.
+3. Valid HMAC-protected temperature readings are accepted.
+4. A controlled tampered temperature payload is rejected because HMAC verification fails.
+5. Stopping TEMP-001 causes an outage alert after the configured 10-second threshold.
+6. Restarting TEMP-001 produces a recovery event and valid readings are accepted again.
+
+See `docs/gns3/week8-temp-monitor-validation.md` for the detailed test record.
+
+## Remaining First-MVP Acceptance Work
+
+The first virtualised slice is working, but the full Pond A milestone is **not complete**. Remaining acceptance work includes:
+
+1. Replace the temporary flat switch/NAT integration network with the planned Pond A routed/router-firewall path.
+2. Restore and enforce MQTT authentication in the GNS3 broker.
+3. Authenticate the monitoring client.
+4. Implement and verify topic ACL rules.
+5. Add packet-capture/Wireshark evidence.
+6. Move/validate DO and implement/validate pH in the Pond A path.
+7. Integrate SAFE/HOLD and demonstrate activation/recovery from trusted monitoring state.
 
 ## Evidence Rule
 
