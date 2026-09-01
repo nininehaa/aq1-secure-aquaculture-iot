@@ -92,8 +92,10 @@ These GNS3 documents describe design/scale-up work. The **first required practic
 
 - [Week 5 progress](progress/week-5.md)
 - [Week 6 progress](progress/week-6.md)
+- [Week 7 progress](progress/week-7.md)
+- [Week 8 progress and priorities](progress/week-8.md)
 
-Future weekly progress records should continue in this folder so the project shows sustained development rather than only a one-time documentation update.
+Weekly records should continue in this folder so the repository shows sustained development and clearly separates actual technical progress from planning/documentation work.
 
 Individual contribution evidence should be created and committed by the relevant team member, while shared project records should remain factual and team-oriented.
 
