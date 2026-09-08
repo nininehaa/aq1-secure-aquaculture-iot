@@ -1,4 +1,4 @@
-# AQ-1 Logical Network Design
+# Logical Network Design
 
 ## Design Overview
 
