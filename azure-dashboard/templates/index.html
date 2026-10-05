@@ -1,1 +1,72 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AQ-1 Dashboard</title><style>body{margin:0;background:#07111f;color:#eef6ff;font-family:Segoe UI,Arial}header{padding:20px;background:#0b1727;border-bottom:1px solid #233952}.wrap{max-width:1300px;margin:auto;padding:18px}.summary,.ponds{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.summary{grid-template-columns:repeat(4,1fr);margin-bottom:15px}.card,.pond,.events{background:#101f33;border:1px solid #233952;border-radius:14px;padding:14px}.v{font-size:24px;font-weight:700}.muted{color:#90a4ba;font-size:12px}.sensor{margin:7px 0;padding:9px;border:1px solid #29415e;border-radius:10px;background:#0a1728}.top{display:flex;justify-content:space-between}.reading{font-size:18px;font-weight:700}.ok{color:#38d487}.bad{color:#ff5d70}.badge{font-size:10px;font-weight:700}.events{margin-top:15px}.ev{padding:7px 0;border-top:1px solid #233952;font-size:12px}.ev:first-child{border-top:0}@media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.ponds{grid-template-columns:1fr}}</style></head><body><header><h1>AQ-1 Secure Aquaculture Monitoring</h1><div class="muted">Azure remote dashboard · verified telemetry only · cloud not safety-critical</div></header><div class="wrap"><div class="summary"><div class="card"><div class="muted">CONTROLLER</div><div id="controller" class="v">—</div><div id="reason" class="muted"></div></div><div class="card"><div class="muted">ONLINE STREAMS</div><div id="online" class="v">0 / 18</div></div><div class="card"><div class="muted">SECURITY EVENTS</div><div id="sec" class="v">0</div></div><div class="card"><div class="muted">REFRESH</div><div id="refresh" class="v">—</div></div></div><div class="ponds"><div class="pond"><h2>Pond A</h2><div id="A"></div></div><div class="pond"><h2>Pond B</h2><div id="B"></div></div><div class="pond"><h2>Pond C</h2><div id="C"></div></div></div><div class="events"><h2>Recent security & control events</h2><div id="events"></div></div></div><script>function esc(x){return String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}function renderSensor(s){let c=s.availability==='ONLINE'?'ok':'bad';let val=s.value===null?'—':esc(s.value)+' '+esc(s.unit);return `<div class="sensor"><div class="top"><b>${esc(s.sensor_id)}</b><span class="badge ${c}">${esc(s.availability)}</span></div><div class="reading">${val}</div><div class="muted">${esc(s.sensor_type)} · ${s.verified?'VERIFIED':'NO VERIFIED DATA'}</div></div>`}async function go(){try{let r=await fetch('/api/state',{cache:'no-store'}),d=await r.json();for(let p of ['A','B','C']){let h='';for(let st of [1,2]){h+=`<h3>Station ${p}${st}</h3>`+d.sensors.filter(x=>x.station===p+st).map(renderSensor).join('')}document.getElementById(p).innerHTML=h}let on=d.sensors.filter(x=>x.availability==='ONLINE').length;online.textContent=on+' / 18';let c=d.controller||{};controller.textContent=c.state||'UNKNOWN';controller.className='v '+(String(c.state).includes('SAFE')?'bad':'ok');reason.textContent=c.reason||'';sec.textContent=d.events.filter(x=>x.kind==='SECURITY_EVENT').length;refresh.textContent=new Date().toLocaleTimeString();events.innerHTML=d.events.length?d.events.slice(0,20).map(x=>`<div class="ev"><b>${esc(x.kind)}</b> ${esc(x.sensor_id||x.state||'')} ${esc(x.event||x.reason||'')}<div class="muted">${esc(x.time||'')}</div></div>`).join(''):'<div class="muted">No events yet.</div>'}catch(e){refresh.textContent='UNAVAILABLE'}}go();setInterval(go,2000)</script></body></html>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AQ-1 Dashboard</title>
+<style>
+body{margin:0;background:#07111f;color:#eef6ff;font-family:Segoe UI,Arial}
+header{padding:20px;background:#0b1727;border-bottom:1px solid #233952}
+.wrap{max-width:1300px;margin:auto;padding:18px}
+.summary,.ponds{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.summary{grid-template-columns:repeat(4,1fr);margin-bottom:15px}
+.card,.pond,.events,.physical{background:#101f33;border:1px solid #233952;border-radius:14px;padding:14px}
+.v{font-size:24px;font-weight:700}.muted{color:#90a4ba;font-size:12px}
+.sensor{margin:7px 0;padding:9px;border:1px solid #29415e;border-radius:10px;background:#0a1728}
+.top{display:flex;justify-content:space-between}.reading{font-size:18px;font-weight:700}
+.ok{color:#38d487}.bad{color:#ff5d70}.badge{font-size:10px;font-weight:700}
+.physical{margin-bottom:15px;border-color:#315d84}.physical-grid{display:grid;grid-template-columns:1fr 2fr;gap:12px;align-items:center}
+.physical-label{font-size:13px;color:#8dc7ff;text-transform:uppercase;letter-spacing:.08em}
+.events{margin-top:15px}.ev{padding:7px 0;border-top:1px solid #233952;font-size:12px}.ev:first-child{border-top:0}
+@media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.ponds,.physical-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>AQ-1 Secure Aquaculture Monitoring</h1>
+<div class="muted">Azure remote dashboard · verified telemetry only · cloud not safety-critical</div>
+</header>
+<div class="wrap">
+<div class="summary">
+<div class="card"><div class="muted">CONTROLLER</div><div id="controller" class="v">—</div><div id="reason" class="muted"></div></div>
+<div class="card"><div class="muted">GNS3 ONLINE STREAMS</div><div id="online" class="v">0 / 18</div></div>
+<div class="card"><div class="muted">SECURITY EVENTS</div><div id="sec" class="v">0</div></div>
+<div class="card"><div class="muted">REFRESH</div><div id="refresh" class="v">—</div></div>
+</div>
+
+<div class="physical">
+<div class="physical-label">Physical validation bench</div>
+<h2>Real Hardware Security Path</h2>
+<div class="physical-grid">
+<div>
+<div class="muted">SOURCE</div>
+<div><b>ESP32-C3 + DS18B20</b></div>
+<div class="muted">TEMP-001 · HMAC-SHA256 validated locally before Azure forwarding</div>
+</div>
+<div id="physical"></div>
+</div>
+</div>
+
+<div class="ponds">
+<div class="pond"><h2>Pond A — GNS3 Farm</h2><div id="A"></div></div>
+<div class="pond"><h2>Pond B — GNS3 Farm</h2><div id="B"></div></div>
+<div class="pond"><h2>Pond C — GNS3 Farm</h2><div id="C"></div></div>
+</div>
+<div class="events"><h2>Recent security & control events</h2><div id="events"></div></div>
+</div>
+<script>
+function esc(x){return String(x??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]))}
+function renderSensor(s){let c=s.availability==='ONLINE'?'ok':'bad';let val=s.value===null?'—':esc(s.value)+' '+esc(s.unit);return `<div class="sensor"><div class="top"><b>${esc(s.sensor_id)}</b><span class="badge ${c}">${esc(s.availability)}</span></div><div class="reading">${val}</div><div class="muted">${esc(s.sensor_type)} · ${s.verified?'VERIFIED':'NO VERIFIED DATA'}</div></div>`}
+async function go(){try{
+let r=await fetch('/api/state',{cache:'no-store'}),d=await r.json();
+physical.innerHTML=(d.physical||[]).map(renderSensor).join('')||'<div class="muted">No physical telemetry yet.</div>';
+for(let p of ['A','B','C']){let h='';for(let st of [1,2]){h+=`<h3>Station ${p}${st}</h3>`+d.sensors.filter(x=>x.station===p+st).map(renderSensor).join('')}document.getElementById(p).innerHTML=h}
+let on=d.sensors.filter(x=>x.availability==='ONLINE').length;online.textContent=on+' / 18';
+let c=d.controller||{};controller.textContent=c.state||'UNKNOWN';controller.className='v '+(String(c.state).includes('SAFE')?'bad':'ok');reason.textContent=c.reason||'';
+sec.textContent=d.events.filter(x=>x.kind==='SECURITY_EVENT').length;refresh.textContent=new Date().toLocaleTimeString();
+events.innerHTML=d.events.length?d.events.slice(0,20).map(x=>`<div class="ev"><b>${esc(x.kind)}</b> ${esc(x.sensor_id||x.state||'')} ${esc(x.event||x.reason||'')}<div class="muted">${esc(x.time||'')}</div></div>`).join(''):'<div class="muted">No events yet.</div>'
+}catch(e){refresh.textContent='UNAVAILABLE'}}
+go();setInterval(go,2000)
+</script>
+</body>
+</html>
