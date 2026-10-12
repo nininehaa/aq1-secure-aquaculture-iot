@@ -1,83 +1,175 @@
-# Implementation Status
+# AQ-1 Implementation Status
 
-**Project:** AQ-1 Secure and Resilient Aquaculture IoT System  
-**Client scenario:** Coral Coast Aquaculture  
-**Purpose:** Give the team, tutor and reviewers one honest source of truth for what is working, what is only designed, and what still requires evidence.
+**Project:** AQ-1 Secure and Resilient Aquaculture IoT Sensor-Control System  
+**Client:** Coral Coast Aquaculture  
+**Status reviewed:** 12 October 2026
 
-## Status Definitions
+## 1. Purpose
 
-- **Implemented** — working code or configuration exists.
-- **Tested / PASS** — implementation has been executed and a recorded test passed.
-- **In progress** — implementation work has started but acceptance criteria are not yet complete.
-- **Planned** — design exists, but the component has not yet been built and demonstrated.
-- **Pending** — required work has not yet started or has no acceptable evidence.
+This document records the final AQ-1 implementation and distinguishes between the initial prototype, demonstrated functionality and future improvements.
 
-## Current System Status
+The final showcase combines two simulated water-quality sensors, one physical temperature sensor, a GNS3 network, cybersecurity verification, controlled attack demonstrations and a Node-RED monitoring dashboard.
 
-| Component | Current status | Working evidence | Remaining work |
-|---|---|---|---|
-| Dissolved-oxygen sensor simulator | Implemented / Tested locally | `scripts/sensors/do_sensor.py`; Week 6 security tests | Move into the Pond A GNS3 path and capture network evidence |
-| Temperature sensor | Implemented / Tested in GNS3 | `scripts/sensors/temperature_sensor.py`; `docs/gns3/week8-temp-monitor-validation.md` | Retest after broker authentication/ACL hardening and final routed topology are added |
-| pH sensor | Pending | Project scope/design only | Implement producer, identity, message format and tests |
-| Mosquitto MQTT broker | Implemented in GNS3 / connectivity tested | Separate GNS3 broker node at test address `192.168.42.130`; `docs/gns3/week8-temp-monitor-validation.md` | Restore/enforce broker authentication in GNS3; authenticate monitor; finish topic ACLs; move to final routed topology |
-| HMAC-SHA256 message integrity | Implemented / Tested locally and temperature tested in GNS3 | DO and temperature signing/verification tests; GNS3 temperature tamper rejection | Standardise message format/key handling across all sensor types |
-| Security monitoring | Implemented / Tested in GNS3 for temperature path | Separate `Neha-Monitor-1` node; `monitor.py`; valid/tamper/outage/recovery GNS3 results | Authenticate monitoring client; add final routed/network and packet-capture evidence; validate DO/pH paths |
-| Per-sensor outage/recovery detection | Implemented / Tested in GNS3 for TEMP-001 | TEMP-001 stop -> outage after 10 seconds -> restart -> recovery | Repeat with full Pond A sensor set and verify one sensor cannot mask another |
-| SAFE/HOLD controller | Pending integration | `docs/implementation/failsafe-controller.md`; Issue #18 | Build controller, consume trusted/outage state, demonstrate activation and recovery |
-| GNS3 Pond A deployment | In progress — first virtualised slice working | Separate TEMP-001, Mosquitto and monitor nodes connected through GNS3 switch; `docs/gns3/week8-temp-monitor-validation.md` | Replace temporary flat switch/NAT path with planned routed Pond A/router-firewall path; add DO/pH; capture traffic |
-| MQTT broker authentication in GNS3 | Pending hardening | Local authenticated broker evidence exists; GNS3 test used temporary anonymous listener | Re-enable credentials in GNS3; verify valid credentials accepted and missing/incorrect credentials rejected; authenticate monitor |
-| MQTT topic ACLs | In progress | Issue #17; broker security design | Implement and test authorised/unauthorised topic access |
-| Attacker/test node | Planned | Threat model and GNS3 design | Add test node if needed and demonstrate rejected credentials/spoof/tamper attempts |
-| Packet capture / Wireshark evidence | Pending | Planned test evidence | Capture traffic from the actual GNS3 path and link captures/screenshots to test cases |
-| Node-RED/dashboard | Planned | Architecture documentation | Build only after core GNS3 security path and SAFE/HOLD integration are stable |
-| TLS | Planned | Security design | Configure and verify later; do not mark implemented until packet capture confirms it |
+## 2. Implementation Summary
 
-## Current Working End-to-End Slice
+| Component | Implementation status | Details |
+|---|---|---|
+| Dissolved oxygen (DO) | Demonstrated | Simulated sensor running in GNS3 |
+| pH | Demonstrated | Simulated sensor running in GNS3 |
+| Physical temperature | Demonstrated | DS18B20 connected to ESP32-C3 |
+| ESP32-C3 programming | Implemented | Arduino IDE |
+| Physical MQTT communication | Demonstrated | ESP32 publishes through HiveMQ |
+| GNS3 gateway integration | Demonstrated | Gateway successfully receives physical temperature readings from HiveMQ |
+| HMAC-SHA256 verification | Demonstrated | Gateway validates message integrity |
+| Spoofing detection | Demonstrated | Forged sensor messages rejected |
+| Tampering detection | Demonstrated | Modified sensor messages rejected |
+| Replay detection | Demonstrated | Previously processed sequence numbers rejected |
+| Sensor outage monitoring | Implemented in earlier prototype | Final multi-sensor test evidence to be consolidated |
+| Node-RED dashboard | Demonstrated | Dashboard developed by Arnob |
+| Logical NORMAL / SAFE-HOLD | Demonstrated | Software-based supervisory control states |
+| Physical pump or relay | Not implemented | No physical actuation was demonstrated |
+| Azure dashboard | Not part of final showcase | Older repository implementation only |
+| Wireshark | Not used | No packet-capture claim |
 
-The strongest demonstrated virtualised slice is now:
+The final GNS3 gateway and Node-RED files still need to be consolidated in the GitHub repository, together with screenshots and final demonstration results.
+
+## 3. Final System Architecture
 
 ```text
-TEMP-001 GNS3 node
+Physical DS18B20
+      |
+   ESP32-C3
+      |
+    HiveMQ
       |
       v
-Mosquitto GNS3 broker
+ GNS3 Gateway <--- Simulated DO Sensor
+      ^        <--- Simulated pH Sensor
+      |
+ GNS3 Attacker Node
       |
       v
-Neha-Monitor-1 GNS3 node
+ Security Verification
       |
-      +--> valid HMAC -> ACCEPTED
-      +--> sensor stopped -> OUTAGE ALERT
-      +--> valid sensor returns -> RECOVERY
-      +--> tampered payload -> REJECTED
+      +-- Accepted readings
+      +-- Rejected readings
+      +-- Security alerts
+      |
+      v
+ Node-RED Dashboard
+      |
+      v
+ Logical NORMAL / SAFE-HOLD Status
 ```
 
-This is the first working GNS3 sensor-to-monitor security slice. It currently uses a temporary flat GNS3 switch/NAT network for integration testing rather than the final routed Pond A/router-firewall design.
+The physical temperature sensor sends real measurements through HiveMQ. The security gateway running in GNS3 receives the MQTT data.
 
-## GNS3 Validation Result
+The simulated DO and pH sensors provide additional measurements within the virtual environment.
 
-The following have been demonstrated for TEMP-001 across separate GNS3 nodes:
+The attacker node provides controlled malicious messages for testing the gateway's cybersecurity controls.
 
-1. TEMP-001 publishes through the virtual network to a separate Mosquitto broker.
-2. The monitoring node connects to the separate broker on TCP port 1883 and subscribes to project topics.
-3. Valid HMAC-protected temperature readings are accepted.
-4. A controlled tampered temperature payload is rejected because HMAC verification fails.
-5. Stopping TEMP-001 causes an outage alert after the configured 10-second threshold.
-6. Restarting TEMP-001 produces a recovery event and valid readings are accepted again.
+## 4. Security Implementation
 
-See `docs/gns3/week8-temp-monitor-validation.md` for the detailed test record.
+### HMAC Verification
 
-## Remaining First-MVP Acceptance Work
+The gateway checks received HMAC values against the expected values calculated using the agreed keys and message formats.
 
-The first virtualised slice is working, but the full Pond A milestone is **not complete**. Remaining acceptance work includes:
+Messages that fail validation are rejected.
 
-1. Replace the temporary flat switch/NAT integration network with the planned Pond A routed/router-firewall path.
-2. Restore and enforce MQTT authentication in the GNS3 broker.
-3. Authenticate the monitoring client.
-4. Implement and verify topic ACL rules.
-5. Add packet-capture/Wireshark evidence.
-6. Move/validate DO and implement/validate pH in the Pond A path.
-7. Integrate SAFE/HOLD and demonstrate activation/recovery from trusted monitoring state.
+### Spoofing Attack
 
-## Evidence Rule
+The attacker attempts to impersonate a legitimate sensor by submitting a forged message.
 
-A feature is not complete because code exists. For this project, completion means **built + configured + run + tested + evidenced + documented**.
+The gateway identifies failed verification and rejects the message.
+
+### Tampering Attack
+
+The attacker modifies a sensor reading without generating a matching valid HMAC.
+
+The gateway detects the mismatch and rejects the altered data.
+
+### Replay Attack
+
+The attacker resends a previously valid sensor message.
+
+The gateway uses sequence-number checks to identify and reject repeated messages in the tested GNS3 pathway.
+
+Replay protection across all sensor pathways, including the physical ESP32, should be recorded separately where implementation differs.
+
+### Availability Monitoring
+
+The earlier monitoring prototype includes timeout-based outage and recovery detection.
+
+Any final GNS3 outage-test results should be recorded with the corresponding gateway logs or screenshots.
+
+## 5. Dashboard and Control
+
+The final showcase used Arnob's Node-RED dashboard to present sensor readings, monitoring information and security-related states.
+
+The demonstration included logical NORMAL and SAFE/HOLD status information.
+
+**The team did not implement physical pump or aerator control.** The control component demonstrates software states, not operation of real farm equipment.
+
+## 6. Initial Prototype vs Final Showcase
+
+| Initial prototype | Final showcase |
+|---|---|
+| Python-based sensor producers | Simulated DO and pH sensors in GNS3 |
+| Python temperature simulation | Physical ESP32-C3 temperature sensor |
+| Local Mosquitto communication | HiveMQ for physical temperature messages |
+| Initial HMAC and outage testing | GNS3 gateway and attack demonstrations |
+| Local console-based monitoring |  Node-RED dashboard |
+| SAFE/HOLD design and planning | Logical software control-state demonstration |
+
+The initial prototype remains valuable evidence of the project's technical development.
+
+## 7. Evidence Already in GitHub
+
+The existing repository contains earlier development evidence, including:
+
+- `scripts/sensors/`
+- `scripts/monitoring/`
+- `scripts/gateway/gateway.py` — earlier prototype gateway
+- `testing/Week_6_Security_Test_Plan.md`
+- `testing/security-test-results.md`
+- `docs/evidence/`
+- `docs/gns3/`
+
+These files should not automatically be treated as the complete final showcase implementation.
+
+## 8. Evidence Still to Consolidate
+
+The following artefacts should be added or linked where available:
+
+- Final GNS3 project/topology
+- Final gateway Python script and configuration
+- Simulated DO and pH sensor scripts used in the showcase
+- Attacker-node demonstration scripts
+- Screenshots or logs from spoofing, tampering and replay tests
+- ESP32 Arduino sketch or firmware source
+- Physical temperature-to-HiveMQ-to-GNS3 test evidence
+- Arnob's Node-RED flow export and dashboard screenshots
+- Logical SAFE/HOLD demonstration evidence
+- Final configuration and setup instructions
+
+Do not upload private credentials, HiveMQ passwords, HMAC secrets or tokens.
+
+## 9. Limitations
+
+AQ-1 is an academic cybersecurity demonstration, not a production-ready automated aquaculture facility.
+
+The project did not include physical DO or pH sensors, a working physical pump, or physical aerator automation.
+
+Additional security hardening, long-term testing, key management, network reliability testing and integration with real farm equipment remain possible future improvements.
+
+## 10. Completion Criteria
+
+A component should be treated as fully evidenced when the team can identify:
+
+1. Its implementation or configuration.
+2. How it was executed.
+3. The observed result.
+4. The related source code or artefact.
+5. The screenshot, log or test result supporting the claim.
+
+The final demonstration and the GitHub documentation should remain consistent.
