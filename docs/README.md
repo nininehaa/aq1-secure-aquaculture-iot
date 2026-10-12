@@ -1,144 +1,263 @@
 # AQ-1 Project Documentation
 
-This folder contains the working documentation for the Coral Coast Aquaculture secure IoT project.
+**Project:** AQ-1 Secure and Resilient IoT Sensor-Control System  
+**Client:** Coral Coast Aquaculture  
+**Course:** COIT13236 Cyber Security Project  
+**Team:** Sahil Basnet, Neha Thanait and Md Monirul Haque Arnob
 
-The documentation is organised so the team, tutor and reviewers can quickly answer four questions:
+## 1. Documentation Overview
 
-1. What are we building?
-2. What actually works now?
-3. Who owns each technical area?
-4. What remains before the final demo?
+This folder contains the technical, security, implementation and project-management documentation for AQ-1.
 
-## Start Here
+The project developed from an initial Python and MQTT prototype into an integrated cybersecurity demonstration using:
 
-Read these in this order:
+- Simulated dissolved oxygen (DO) and pH sensors in GNS3.
+- A physical DS18B20 temperature sensor connected to an ESP32-C3.
+- HiveMQ for transmitting physical temperature readings.
+- A Python security gateway running in GNS3.
+- HMAC-SHA256 integrity verification and replay detection.
+- Controlled spoofing, tampering and replay demonstrations.
+- A Node-RED dashboard for monitoring sensor information and security events.
+- Logical NORMAL and SAFE/HOLD control states.
 
-1. [Current project plan](project-management/project-plan.md) — **main delivery plan**, including one-Pond-A MVP, ownership, delivery order and stretch goals.
-2. [Implementation status](project-management/implementation-status.md) — **single source of truth for what actually works today**.
-3. [Team roles](team-roles.md) — who is responsible for each technical workstream.
-4. [Project overview](project-overview.md) — business problem, security goal and prototype background.
-5. [Requirements traceability](project-management/requirements-traceability.md) — requirement-to-owner-to-implementation/test/evidence mapping.
-6. [Risk register](project-management/risk-register.md) — current technical, delivery and evidence risks.
-7. [Current Week 6 architecture](architecture/current-week6-architecture.md) — historical/current-prototype architecture plus the documented scale-up direction.
-8. [Local demo setup](setup/local-demo-setup.md) — how to reproduce the current local secure MQTT demo.
-9. [Project decisions](project-decisions.md) — important technical choices and why they were made.
-10. [Troubleshooting log](troubleshooting.md) — implementation problems, investigation and resolution.
-11. [Project evidence index](evidence-index.md) — where code, tests, commits and documentation can be found.
+The project did not include physical pump, aerator or relay operation.
 
-## Important Scope Clarification
+## 2. Start Here
 
-The current project plan separates the **MVP** from **future scale-up**.
+These documents provide the main overview of the project.
 
-### Immediate MVP
+1. [Main Project README](../README.md) — Project summary, architecture, technologies and outcomes.
+2. [Project Overview](project-overview.md) — Business problem, objectives and final implementation.
+3. [Project Plan](project-management/project-plan.md) — Development phases, implementation scope and remaining tasks.
+4. [Implementation Status](project-management/implementation-status.md) — Demonstrated components, limitations and documentation still required.
+5. [Team Roles and Collaboration](team-roles.md) — Technical responsibilities and collaborative development.
+6. [Requirements Traceability](project-management/requirements-traceability.md) — Requirements, implementation and testing.
+7. [Final System Architecture](architecture/system-architecture.md) — Logical system components and communication.
+8. [Security Design](security/security-design.md) — Cybersecurity threats, controls and attack demonstrations.
 
-The immediate implementation target is **one Pond A GNS3 path** using the project sensor scope of dissolved oxygen, temperature and pH.
+## 3. Final System Overview
 
-The current local prototype already has working DO and temperature paths. The pH path remains to be implemented/tested.
+The completed academic demonstration combines simulated aquaculture sensor information with real physical temperature measurements.
 
-The first routed GNS3 milestone may begin with `TEMP-001` and then expand the Pond A implementation.
+### Sensor Implementation
 
-### Future scale-up / stretch
+| Sensor | Implementation |
+|---|---|
+| Dissolved oxygen | Simulated in GNS3 |
+| pH | Simulated in GNS3 |
+| Temperature | Physical DS18B20 sensor connected to ESP32-C3 |
 
-The following are not the immediate first GNS3 requirement:
+### Communication and Monitoring
 
-- Pond B and Pond C
-- backup MQTT broker
-- larger attacker/test network
-- extra feeder/sensor identities
-- advanced Node-RED dashboard features
-- TLS/stronger key management
-- broker failover/redundancy and larger-scale load tests
+```text id="d5w4sm"
+Physical DS18B20 Sensor
+          |
+        ESP32-C3
+          |
+          v
+     HiveMQ Broker
+          |
+          v
+     GNS3 Gateway <--- Simulated DO Sensor
+          ^        <--- Simulated pH Sensor
+          |
+     Attacker Node
+          |
+          v
+   Security Verification
+          |
+          v
+   Sensor Data and Alerts
+          |
+          v
+    Node-RED Dashboard
+          |
+          v
+   Logical NORMAL / SAFE-HOLD
+```
 
-These should remain marked **Planned** or **In progress** until implemented and evidenced.
+The gateway receives messages and performs security checks before readings are treated as trusted.
 
-## Project Management and Engineering Control
+Node-RED is the final monitoring dashboard.
 
-- [Current project plan](project-management/project-plan.md)
-- [Implementation status](project-management/implementation-status.md)
-- [Requirements and traceability matrix](project-management/requirements-traceability.md)
-- [Risk register](project-management/risk-register.md)
-- [Weekly engineering review template](project-management/weekly-review-template.md)
+The older Azure dashboard implementation is not part of the final showcase.
 
-The project-management files are live engineering records. When implementation status, scope, risk, ownership or acceptance evidence changes, update the appropriate existing record rather than creating a competing version of the plan.
+## 4. Architecture and Design Documents
 
-## Design Documentation
+### Final Architecture
 
-- [Sensor, MQTT and network-security design — Sahil](design/sensor-mqtt-network-security-design.md)
-- [Monitoring and trust-validation design — Neha](design/monitoring-trust-validation-design.md)
+- [System Architecture](architecture/system-architecture.md) — Final GNS3, physical sensor and dashboard architecture.
+- [Security Design](security/security-design.md) — Security controls, message verification and attack handling.
 
-Each major technical workstream should have a design document that explains intended behaviour, interfaces, normal and failure flows, security controls, design decisions, assumptions/limitations and acceptance criteria. Design documentation should be linked to the corresponding implementation and test evidence.
+### Earlier Architecture and Design
 
-## Implementation Documentation
+These files document the project's development and initial technical decisions:
 
-- [Dissolved-oxygen sensor](implementation/dissolved-oxygen-sensor.md)
-- [Temperature sensor](implementation/temperature-sensor.md)
-- [MQTT broker and authentication](implementation/mqtt-broker.md)
-- [Monitoring and verification](implementation/monitoring.md)
-- [Fail-safe controller](implementation/failsafe-controller.md)
+- [Week 6 Architecture](architecture/current-week6-architecture.md)
+- [Sensor, MQTT and Network Security Design](design/sensor-mqtt-network-security-design.md)
+- [Monitoring and Trust Validation Design](design/monitoring-trust-validation-design.md)
+- [Design Documentation](design/design%20documentation.md)
 
-## Security Documentation
+Earlier designs should be treated as historical development records where they differ from the final implementation.
 
-- [Security design](security/security-design.md)
-- [Threat model](security/threat-model.md)
-- [Temperature MQTT and HMAC security](security/temperature-mqtt-security.md)
+## 5. GNS3 Documentation
 
-## Testing
+The GNS3 environment provided the virtual network used for simulated sensors, gateway communication and controlled security testing.
 
-- [Week 6 Security Test Plan](../testing/Week_6_Security_Test_Plan.md)
-- [Consolidated security test results](../testing/security-test-results.md)
+Existing documentation:
+
+- [GNS3 Design](gns3/gns3-design.md)
+- [Network Addressing](gns3/network-addressing.md)
+- [Week 7 Temperature and Monitoring Validation](gns3/week7-temp-monitor-validation.md)
+
+The final GNS3 implementation should be documented using the actual final topology, network settings and scripts.
+
+Earlier GNS3 documents may describe configurations used during development rather than the final showcase.
+
+## 6. Sensor and Monitoring Implementation
+
+### Initial Python Prototype
+
+The original prototype used Python sensor programs and Eclipse Mosquitto MQTT.
+
+Relevant repository files include:
+
+- [Dissolved Oxygen Sensor](../scripts/sensors/do_sensor.py)
+- [Temperature Sensor Prototype](../scripts/sensors/temperature_sensor.py)
+- [Security Monitor](../scripts/monitoring/monitor.py)
+- [Initial Gateway](../scripts/gateway/gateway.py)
+- [Dissolved Oxygen Implementation Notes](implementation/dissolved-oxygen-sensor.md)
+- [Monitoring Implementation Notes](implementation/monitoring.md)
+
+These files provide historical implementation context.
+
+They should not automatically be described as the exact scripts running in the final GNS3 showcase.
+
+### Physical Temperature Integration
+
+The final physical temperature pathway was:
+
+`DS18B20 → ESP32-C3 → HiveMQ → GNS3 Gateway`
+
+The physical sensor was programmed using Arduino IDE.
+
+The corresponding final Arduino sketch, configuration instructions and integration results should be added to the repository when available.
+
+## 7. Cybersecurity Testing
+
+The project focused on verifying incoming sensor data and detecting malicious messages.
+
+### Main Attack Demonstrations
+
+| Attack | Security objective |
+|---|---|
+| Spoofing | Detect forged sensor messages |
+| Tampering | Detect modified data through HMAC verification |
+| Replay | Detect previously processed messages through sequence-number checks |
+
+### Earlier Test Documentation
+
 - [Week 5 Test Plan](../testing/week5_test_plan.md)
+- [Week 6 Security Test Plan](../testing/Week_6_Security_Test_Plan.md)
+- [Security Test Results](../testing/security-test-results.md)
 
-## GNS3 Network Work
+These documents record earlier project testing.
 
-- [GNS3 deployment design](gns3/gns3-design.md)
-- [Planned network addressing](gns3/network-addressing.md)
-- [Week 7 TEMP-001 to monitor validation](gns3/week7-temp-monitor-validation.md)
+The final GNS3 attack results should be documented separately, including the actual commands, gateway responses and observed outcomes.
 
-These GNS3 documents distinguish planned scale-up from demonstrated runtime evidence. The **first required practical milestone remains the one-Pond-A routed path** defined in the current project plan.
+## 8. Node-RED Dashboard and Logical Control
 
-## Progress Records
+The final showcase used Arnob's Node-RED dashboard.
 
-- [Week 5 progress](progress/week-5.md)
-- [Week 6 progress](progress/week-6.md)
-- [Week 7 progress](progress/week-7.md)
-- [Neha Week 7 individual technical progress](progress/neha-week7-individual-progress.md)
-- [Week 8 progress and priorities](progress/week-8.md)
+The dashboard was used to present sensor information, security alerts and logical control-state information.
 
-Weekly records should continue in this folder so the repository shows sustained development and clearly separates actual technical progress from planning/documentation work.
+The project demonstrated software-based NORMAL and SAFE/HOLD states.
 
-Individual contribution evidence should be created and committed by the relevant team member, while shared project records should remain factual and team-oriented.
+No physical pump, aerator or relay was operated.
 
-## Documentation Rule
+The final Node-RED flow export and dashboard screenshots should be included in the repository to support reproducibility.
 
-For each meaningful project change, record:
+## 9. Project Management
 
-1. Why the work was needed.
-2. What was implemented or changed.
-3. How it works.
-4. How it was configured/run.
-5. How it was tested.
-6. What result was observed.
-7. Where the evidence is located.
-8. What remains to be done.
+The following documents record project decisions and progress:
 
-Code and screenshots are evidence, but the documentation explains the purpose, design, implementation and result of that evidence.
+- [Project Plan](project-management/project-plan.md)
+- [Implementation Status](project-management/implementation-status.md)
+- [Requirements Traceability](project-management/requirements-traceability.md)
+- [Risk Register](project-management/risk-register.md)
+- [Project Decisions](project-decisions.md)
+- [Weekly Review Template](project-management/weekly-review-template.md)
+- [Troubleshooting](troubleshooting.md)
 
-## Definition of Done
+These documents should be kept consistent with the final project scope.
 
-For this project, **code alone is not implementation evidence**. A feature is complete only when it is:
+## 10. Development Progress Records
 
-**built + configured + run + tested + evidenced + documented**.
+The repository contains progress records from earlier stages:
 
-Where applicable, the requirement should also be linked to a GitHub issue/card, implementation commit/PR and acceptance test.
+- [Week 5 Progress](progress/week-5.md)
+- [Week 6 Progress](progress/week-6.md)
+- [Week 7 Progress](progress/week-7.md)
+- [Week 8 Progress](progress/week-8.md)
 
-## Status Language
+These documents record how the project developed over time and should not be rewritten to suggest that later functionality existed in earlier weeks.
 
-Use the following consistently:
+The repository was used collaboratively. Uploading a file or creating a commit does not necessarily mean that a single person exclusively developed that component.
 
-- **Implemented** — working code/configuration exists.
-- **Tested / PASS** — a recorded test was performed successfully.
-- **In progress** — work has started but is not complete.
-- **Planned** — design or future work only.
-- **Pending** — required work/test has not yet been completed.
+## 11. Project Evidence Index
 
-This prevents future architecture or stretch goals from being mistaken for finished implementation.
+- [Evidence Index](evidence-index.md)
+
+This file should distinguish between:
+
+- Earlier Python and MQTT prototype results.
+- GNS3 network and cybersecurity demonstrations.
+- Physical ESP32 temperature-sensor integration.
+- Node-RED monitoring and logical control.
+- Final documentation and configuration still to be consolidated.
+
+## 12. Remaining Repository Organisation
+
+The following final artefacts should be added or linked when available:
+
+- Final GNS3 project and topology.
+- Final Python gateway script.
+- GNS3 dissolved oxygen and pH scripts.
+- Attacker-node scripts for spoofing, tampering and replay.
+- ESP32-C3 Arduino sketch.
+- HiveMQ and GNS3 integration instructions.
+- Node-RED flow export.
+- Final security test results.
+- Dashboard and demonstration screenshots.
+- Startup and troubleshooting instructions.
+
+Files containing passwords, HMAC secret keys or private credentials must not be committed.
+
+## 13. Historical and Superseded Components
+
+The repository contains files associated with the earlier prototype and Azure dashboard experiments.
+
+These records may be retained as historical development material but should not be confused with the final Node-RED implementation.
+
+Any decision to archive or remove outdated files should be made after checking that they are not required for project history or assessment records.
+
+## 14. Documentation Principles
+
+Project documentation should accurately distinguish:
+
+- What was planned.
+- What was implemented.
+- What was demonstrated.
+- What was tested.
+- What remains to be documented.
+- What was outside the implemented scope.
+
+The team's technical work should be described collaboratively, while maintaining clarity about the functions of each component.
+
+## 15. Project Outcome
+
+AQ-1 demonstrates how simulated aquaculture sensors and physical IoT hardware can be integrated with cybersecurity verification and dashboard monitoring.
+
+The project highlights the importance of message integrity, replay detection, sensor availability and logical safe-control responses when handling aquaculture sensor information.
+
+The documentation supports understanding, reviewing and reproducing the team's academic cybersecurity implementation.
