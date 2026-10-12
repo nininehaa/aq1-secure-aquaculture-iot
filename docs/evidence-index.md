@@ -1,155 +1,266 @@
-# Project Evidence Index
+# AQ-1 Project Evidence Index
 
-## Purpose
+**Project:** AQ-1 Secure and Resilient IoT Sensor-Control System  
+**Client:** Coral Coast Aquaculture  
+**Course:** COIT13236 Cyber Security Project  
+**Team:** Sahil Basnet, Neha Thanait and Md Monirul Haque Arnob
 
-This file connects project documentation to actual code, configuration, tests and Git history so that project reviews and demonstrations can move from a requirement to the corresponding implementation and evidence.
+## 1. Purpose
 
-## Current Implementation Evidence
+This document provides an organised overview of the technical implementation, testing and supporting materials developed throughout the AQ-1 project.
 
-| Area | Main evidence | Status |
+The project evolved from an initial Python and MQTT prototype into a GNS3-based cybersecurity demonstration integrating physical and simulated sensors, security verification and Node-RED monitoring.
+
+This index distinguishes between earlier prototype materials, functionality demonstrated in the final showcase and technical files that still need to be consolidated in GitHub.
+
+The repository is a collaborative team workspace. The person who uploads a file is not necessarily its sole developer.
+
+## 2. Final Project Components
+
+| Component | Implementation | Status |
 |---|---|---|
-| Project overview | `README.md`, `docs/project-overview.md` | Current |
-| Implementation status | `docs/project-management/implementation-status.md` | Current source of truth |
-| Requirements traceability | `docs/project-management/requirements-traceability.md` | Current |
-| Risk register | `docs/project-management/risk-register.md` | Live |
-| System architecture | `docs/architecture/system-architecture.md`, `docs/architecture/current-week6-architecture.md` | Current + planned scale-up |
-| Dissolved-oxygen sensor | `scripts/sensors/do_sensor.py`, `docs/implementation/dissolved-oxygen-sensor.md` | Implemented locally |
-| Temperature sensor | `scripts/sensors/temperature_sensor.py`, `docs/implementation/temperature-sensor.md`, `docs/gns3/week7-temp-monitor-validation.md` | Implemented locally and validated in first GNS3 slice |
-| pH sensor | Project scope/design | Pending implementation |
-| Mosquitto broker | `configs/mosquitto/mosquitto.conf`, `docs/implementation/mqtt-broker.md`, `docs/gns3/week7-temp-monitor-validation.md` | Implemented locally; separate GNS3 broker used for first validation slice |
-| Temperature MQTT authentication | sensor/broker implementation and Week 6 authentication test | PASS for tested local flow; GNS3 enforcement still pending |
-| DO HMAC generation | `scripts/sensors/do_sensor.py` | Implemented |
-| Temperature HMAC generation | `scripts/sensors/temperature_sensor.py` | Implemented |
-| Monitoring / HMAC verification | `scripts/monitoring/monitor.py`, `docs/implementation/monitoring.md`, `docs/progress/neha-week7-individual-progress.md` | Implemented and validated in GNS3 for temperature path |
-| Temperature tamper test | `scripts/security/temperature_tamper_test.py`, `docs/gns3/week7-temp-monitor-validation.md` | PASS in first GNS3 slice |
-| Sensor outage/recovery | `scripts/monitoring/monitor.py`, Week 6 tests, `docs/gns3/week7-temp-monitor-validation.md` | PASS locally and for TEMP-001 in GNS3 |
-| SAFE/HOLD control | `docs/implementation/failsafe-controller.md`, Issue #18 | Pending integration |
-| GNS3 deployment | `docs/gns3/gns3-design.md`, `docs/gns3/week7-temp-monitor-validation.md`, Issue #16 | First virtualised slice demonstrated; routed Pond A path still in progress |
-| GNS3 addressing | `docs/gns3/network-addressing.md` | Planned until final routed addressing is applied |
+| Dissolved oxygen sensor | Simulated in GNS3 | Demonstrated |
+| pH sensor | Simulated in GNS3 | Demonstrated |
+| Temperature sensor | Physical DS18B20 connected to ESP32-C3 | Demonstrated |
+| Physical MQTT communication | ESP32-C3 → HiveMQ → GNS3 gateway | Demonstrated |
+| Security gateway | Python gateway running within GNS3 | Demonstrated |
+| HMAC-SHA256 integrity verification | Gateway security validation | Demonstrated |
+| Spoofing detection | Controlled attacker-node test | Demonstrated |
+| Tampering detection | Controlled attacker-node test | Demonstrated |
+| Replay detection | Sequence-number checking in tested GNS3 pathway | Demonstrated |
+| Sensor outage and recovery | Timeout-based monitoring | Tested in earlier prototype; final records to be consolidated |
+| Node-RED dashboard | Monitoring and visualisation | Demonstrated |
+| Logical NORMAL and SAFE/HOLD | Software-based control states | Demonstrated |
+| Physical pump or relay control | Not implemented | Outside scope |
+| Azure dashboard | Earlier implementation experiment | Not used in final showcase |
 
-## Week 6 Test Evidence
+A component being demonstrated does not automatically mean its final source code, configuration and screenshots are already present in GitHub.
 
-Primary test record:
+## 3. Current GitHub Documentation
 
-`testing/Week_6_Security_Test_Plan.md`
+### Project Information
 
-Consolidated summary:
+- [Main README](../README.md)
+- [Project Overview](project-overview.md)
+- [Project Plan](project-management/project-plan.md)
+- [Implementation Status](project-management/implementation-status.md)
+- [Team Roles](team-roles.md)
+- [Requirements Traceability](project-management/requirements-traceability.md)
 
-`testing/security-test-results.md`
+### Architecture and Security
 
-Recorded results include:
+- [System Architecture](architecture/system-architecture.md)
+- [Security Design](security/security-design.md)
+- [Threat Model](security/threat-model.md)
+- [GNS3 Design](gns3/gns3-design.md)
+- [Network Addressing](gns3/network-addressing.md)
 
-- valid DO HMAC — PASS
-- invalid DO HMAC — PASS
-- malformed DO message — PASS
-- DO outage — PASS
-- DO recovery — PASS
-- temperature outage — PASS
-- temperature recovery — PASS
-- missing MQTT credentials rejected — PASS
-- valid temperature HMAC — PASS
-- tampered temperature reading rejected — PASS
-- SAFE/HOLD activation — PENDING
+These documents explain the system architecture, cybersecurity objectives and relevant design decisions.
 
-These Week 6 results are local-prototype results unless the individual test record explicitly states otherwise.
+Historical documents may describe earlier configurations rather than the final showcase.
 
-## Week 7 GNS3 Evidence
+## 4. Initial Python and MQTT Prototype
 
-The first virtualised temperature-to-monitor slice is recorded in:
+The team initially used Python-based sensor simulations and Eclipse Mosquitto MQTT.
 
-`docs/gns3/week7-temp-monitor-validation.md`
+Relevant source files include:
 
-Demonstrated results include:
+- [Dissolved Oxygen Sensor](../scripts/sensors/do_sensor.py)
+- [Temperature Sensor Prototype](../scripts/sensors/temperature_sensor.py)
+- [Security Monitor](../scripts/monitoring/monitor.py)
+- [Initial Gateway](../scripts/gateway/gateway.py)
 
-- separate `AQ1-TEMP-001-1`, `AQ1-Mosquitto-Broker-1` and `Neha-Monitor-1` GNS3 nodes
-- monitor connected to the separate broker over the GNS3 network
-- valid TEMP-001 HMAC-protected readings accepted — PASS
-- temperature outage after 10 seconds — PASS
-- recovery after valid readings returned — PASS
-- tampered temperature payload rejected because HMAC verification failed — PASS
+### Recorded Prototype Testing
 
-The Week 7 validation used a temporary flat switch/NAT path and temporary anonymous broker listener for connectivity testing. It does not prove final GNS3 broker authentication, ACLs, routing/firewall or packet capture requirements.
+- [Week 5 Test Plan](../testing/week5_test_plan.md)
+- [Week 6 Security Test Plan](../testing/Week_6_Security_Test_Plan.md)
+- [Security Test Results](../testing/security-test-results.md)
 
-## Individual Contribution Evidence
+The earlier prototype tested MQTT communication, HMAC verification, modified-message rejection, sensor outage detection and recovery behaviour.
 
-### Neha Thanait — Security Monitoring, Trust Validation and Testing
+These records show how the team developed and validated the project's initial cybersecurity functionality.
 
-Current individual evidence is consolidated in:
+They should not be treated as the complete final GNS3 implementation.
 
-`docs/progress/neha-week7-individual-progress.md`
+## 5. GNS3 Implementation
 
-Relevant technical evidence includes:
+GNS3 was used to build the virtual aquaculture environment.
 
-- `scripts/monitoring/monitor.py`
-- PR #3 — monitoring and outage-detection work
-- PR #14 — per-sensor outage and recovery
-- PR #15 — DO HMAC verification and tamper rejection
-- `docs/implementation/monitoring.md`
-- Week 5 and Week 6 monitoring/security tests
-- `docs/gns3/week7-temp-monitor-validation.md`
-- Week 7 runtime evidence for HMAC acceptance, tamper rejection, outage and recovery in GNS3
+The final demonstration incorporated:
 
-This document is intended to make Neha's personal technical contribution easy to demonstrate during mentoring without confusing it with shared team records.
+- Simulated dissolved oxygen readings.
+- Simulated pH readings.
+- A Python security gateway.
+- Communication between relevant virtual components.
+- Controlled attacker-node demonstrations.
+- Integration of physical temperature readings through HiveMQ.
+- Monitoring and logical control-state information.
 
-### Sensor / MQTT / Network Security Workstream
+### Existing GNS3 Documentation
 
-Relevant shared/workstream evidence includes:
+- [GNS3 Design](gns3/gns3-design.md)
+- [Network Addressing](gns3/network-addressing.md)
 
-- `scripts/sensors/`
-- `configs/mosquitto/`
-- `docs/implementation/temperature-sensor.md`
-- `docs/implementation/mqtt-broker.md`
-- `docs/security/temperature-mqtt-security.md`
-- Issue #17 — MQTT authentication, topic standardisation and ACL preparation
-- Issue #16 — shared GNS3 network-scale work
+### Final GNS3 Artefacts to Consolidate
 
-### Control and Resilience Workstream
+- Final project export or topology.
+- Actual virtual node configurations.
+- Final Python gateway code.
+- Simulated DO and pH sensor programs.
+- Network configuration and startup instructions.
+- Screenshots or logs confirming final connectivity.
 
-Relevant evidence includes:
+These should be recorded using the actual settings from the working showcase environment rather than values from earlier design proposals.
 
-- `docs/implementation/failsafe-controller.md`
-- Issue #18 — SAFE/HOLD fail-safe control
+## 6. Physical ESP32 Temperature Sensor
 
-SAFE/HOLD implementation/test remains pending and must not be marked complete until working evidence is committed.
+The physical temperature-sensing implementation used:
 
-## Configuration and Secret Handling Evidence
+- ESP32-C3 microcontroller.
+- DS18B20 temperature sensor.
+- Arduino IDE.
+- HiveMQ MQTT broker.
 
-Mosquitto configuration:
+### Physical Sensor Data Flow
 
-`configs/mosquitto/mosquitto.conf`
+```text
+DS18B20 Temperature Sensor
+             |
+             v
+          ESP32-C3
+             |
+             v
+        HiveMQ Broker
+             |
+             v
+        GNS3 Gateway
+             |
+             v
+      Security Monitoring
+```
 
-Local password/secrets files should not be committed. Sensor/broker credentials and HMAC secrets should be supplied through environment variables or local secret/configuration mechanisms excluded from version control.
+The team successfully received physical temperature readings at the GNS3 gateway through HiveMQ.
 
-## Project Management Evidence
+### Artefacts to Consolidate
 
-- `docs/project-management/implementation-status.md` — current implementation truth
-- `docs/project-management/requirements-traceability.md` — requirement-to-evidence mapping
-- `docs/project-management/risk-register.md` — live project/security risk register
-- `docs/project-management/weekly-review-template.md` — repeatable weekly engineering review format
-- `docs/project-decisions.md` — architecture/design decisions and reasons
-- GitHub issues / project board — ownership and current work
-- Teams — discussion/decision context where required by the unit workflow
+- Final Arduino sketch.
+- Relevant hardware wiring information.
+- MQTT topic and connection configuration, excluding credentials.
+- Gateway reception and verification results.
+- Photographs or screenshots from testing, where available.
 
-## Evidence Still Needed
+## 7. Cybersecurity Attack Testing
 
-Add these only after the relevant implementation is actually completed:
+Three primary attacks were demonstrated within the GNS3 environment.
 
-- final Pond A routed/router-firewall topology screenshots/exported project evidence
-- final node IP assignments and routing tests
-- MQTT ACL configuration and authorised/unauthorised tests in GNS3
-- monitoring-client authenticated MQTT test in GNS3
-- packet captures from the routed GNS3 path
-- DO migration/validation in GNS3
-- pH sensor implementation and security tests
-- SAFE/HOLD implementation, activation and recovery evidence
-- Node-RED/dashboard screenshots or exported flows if implemented
-- TLS configuration and verification if implemented
-- resilience/failover evidence if a backup broker becomes part of the tested scope
+| Test | Attack behaviour | Expected security result |
+|---|---|---|
+| Spoofing | Submit a forged sensor message | Invalid message rejected |
+| Tampering | Change a protected sensor reading | HMAC mismatch detected |
+| Replay | Resend a previously valid sensor message | Repeated sequence number rejected |
 
-## Evidence Rule
+### Supporting Results to Consolidate
 
-A screenshot without context is not enough, and code without execution is not enough. Each important feature should be traceable through:
+For each attack, record:
 
-`requirement -> owner/issue -> code/config -> running implementation -> test -> actual result -> evidence`
+1. The attack scenario and purpose.
+2. Which simulated sensor identity was used.
+3. How the controlled attack was executed.
+4. The gateway response.
+5. Whether the test passed.
+6. The relevant screenshot, log or script.
 
-Planned features must remain marked **Planned/Pending** until that chain exists.
+The final attack evidence should be recorded separately from the earlier Week 6 prototype tests.
+
+## 8. Node-RED Dashboard
+
+The final AQ-1 demonstration used the Node-RED dashboard developed as part of the team's integrated GNS3 environment.
+
+The dashboard presents sensor information, monitoring events, security alerts and logical control status.
+
+### Artefacts to Consolidate
+
+- Node-RED flow export.
+- Dashboard screenshots.
+- Gateway-to-dashboard communication configuration.
+- Logical NORMAL and SAFE/HOLD demonstration results.
+- Relevant monitoring or data-storage configuration.
+
+The older Azure dashboard code does not represent the final showcase dashboard.
+
+## 9. Logical Control
+
+AQ-1 demonstrates software-based supervisory control states.
+
+### NORMAL
+
+Indicates that the monitoring system has acceptable trusted sensor information.
+
+### SAFE/HOLD
+
+Indicates that unreliable or unavailable information requires a safety-oriented supervisory response.
+
+These are logical states, not evidence of physical actuator operation.
+
+No physical pump, aerator or relay was implemented or operated.
+
+## 10. Project Progress and Management Records
+
+The repository includes project-management and earlier progress documentation:
+
+- [Project Decisions](project-decisions.md)
+- [Risk Register](project-management/risk-register.md)
+- [Week 5 Progress](progress/week-5.md)
+- [Week 6 Progress](progress/week-6.md)
+- [Week 7 Progress](progress/week-7.md)
+- [Week 8 Progress](progress/week-8.md)
+- [AI Use Log](../AI-log.md)
+
+These documents provide historical context and should retain the chronological development of the project.
+
+## 11. Outstanding Repository Tasks
+
+The remaining repository organisation tasks include:
+
+- Consolidating the final GNS3 project and source files.
+- Adding the ESP32 Arduino sketch.
+- Adding the final Node-RED flow.
+- Documenting actual final MQTT topic names and sensor identifiers.
+- Recording final security attack outcomes.
+- Correcting outdated historical document descriptions.
+- Reviewing the older Azure dashboard files and workflow.
+- Updating setup instructions so the final demonstration can be reproduced.
+- Checking that documentation links point to existing files.
+
+These tasks relate primarily to the completeness and consistency of the repository, rather than implying that the corresponding features were not demonstrated.
+
+## 12. Security of Repository Contents
+
+The project repository should not contain:
+
+- MQTT passwords.
+- HiveMQ credentials.
+- HMAC secret keys.
+- Azure or other service tokens.
+- Private certificates or keys.
+- Other confidential configuration information.
+
+Use placeholder values in documentation and environment variables or appropriately protected local configuration for sensitive values.
+
+## 13. Team Collaboration
+
+AQ-1 was developed collaboratively by Sahil Basnet, Neha Thanait and Md Monirul Haque Arnob.
+
+The team contributed to planning, implementation, configuration, troubleshooting, testing and integration.
+
+GitHub was used to maintain shared project materials. Individual uploads or commits do not necessarily establish exclusive authorship of a particular component.
+
+The main purpose of this evidence index is to document the project's technical functionality and results.
+
+## 14. Summary
+
+AQ-1 demonstrates the integration of simulated aquaculture sensors, a physical IoT temperature sensor, MQTT communication, GNS3 cybersecurity verification and Node-RED monitoring.
+
+Its principal cybersecurity demonstrations involve HMAC-based integrity checking, spoofing and tampering detection, replay protection and logical safe-control responses.
+
+This index connects the project documentation with the implementation and testing materials needed to understand and reproduce the academic demonstration.
