@@ -1,4 +1,4 @@
-# Secure and Resilient IoT Sensor-Control System
+# AQ-1 Secure and Resilient IoT Sensor-Control System
 
 ## Client
 Coral Coast Aquaculture
@@ -8,160 +8,315 @@ Coral Coast Aquaculture
 - Sahil Basnet
 - Md Monirul Haque Arnob
 
-## Project Scenario
-AQ-1 — IoT/Sensor Security for a Prawn and Barramundi Farm
+## 1. Project Overview
 
-## Project Goal
-This project is building a secure and resilient aquaculture IoT sensor-control system that protects sensor identity, message integrity, trusted-data availability and safe control behaviour.
+AQ-1 is a cybersecurity capstone project developed to demonstrate how IoT sensor data can be secured and monitored in an aquaculture environment.
 
-The project scope includes three main sensor types:
+Aquaculture farms depend on water-quality measurements such as dissolved oxygen (DO), pH and temperature to maintain suitable conditions for fish and prawns.
 
-- dissolved oxygen (DO)
-- temperature
-- pH
+If an attacker modifies sensor readings, impersonates a legitimate sensor or replays old messages, the system may receive misleading information and make unsafe decisions.
 
-The current local prototype has working DO and temperature paths. The pH path is still pending implementation/testing.
+Our project demonstrates how sensor messages can be verified before being trusted and how the monitoring system responds to malicious or unavailable data.
 
-## Main Implementation Target (MVP)
+The main cybersecurity objectives are:
 
-The immediate target is **one secure Pond A deployment in GNS3**, not three complete ponds.
+- **Integrity:** Detect modified sensor readings using HMAC-SHA256.
+- **Authenticity:** Verify messages using sensor identity and shared cryptographic keys.
+- **Availability:** Detect missing or interrupted sensor readings.
+- **Replay protection:** Reject previously processed messages using sequence numbers and freshness checks.
+- **Fail-safe monitoring:** Demonstrate logical SAFE/HOLD responses when trusted sensor information is unavailable.
 
-```text
-Pond A sensor endpoints
-(DO + Temperature + pH)
-          |
-          v
-Pond A virtual network
-          |
-          v
-Router / Firewall
-          |
-          v
-Mosquitto MQTT broker
-          |
-          v
-Security monitoring / trust validation
-          |
-          v
-SAFE/HOLD control
-```
+## 2. Sensor Implementation
 
-The first GNS3 milestone may start with the existing `TEMP-001` path and then add the remaining Pond A sensor paths.
+Our project combines simulated aquaculture sensors with a physical IoT temperature sensor.
 
-The current Python producers are the local security-prototype/test baseline. The final project should move the working security path onto separated GNS3 nodes/endpoints so the result is not only a localhost sensor simulation.
+| Sensor | Implementation | Purpose |
+|---|---|---|
+| Dissolved oxygen (DO) | Simulated in GNS3 | Generate oxygen readings for security monitoring and attack demonstrations |
+| pH | Simulated in GNS3 | Generate water pH readings within the virtual farm environment |
+| Temperature | Physical DS18B20 sensor connected to ESP32-C3 | Collect real temperature measurements and transmit them to the GNS3 gateway |
 
-For the full delivery order, ownership and acceptance criteria, see the [current project plan](docs/project-management/project-plan.md).
+The physical temperature sensor was programmed using Arduino IDE and successfully communicated with the gateway through HiveMQ MQTT.
 
-## Current Working Prototype
+The DO and pH sensors were simulated rather than physically deployed.
 
-Implemented/tested locally in the repository:
+## 3. System Architecture
 
-- dissolved-oxygen and temperature producer paths
-- Eclipse Mosquitto MQTT messaging
-- authenticated MQTT path for temperature sensor `TEMP-001`
-- anonymous MQTT access disabled in the current secure broker configuration
-- HMAC-SHA256 generation for DO and temperature readings
-- HMAC verification for DO and temperature readings
-- controlled temperature tamper-test client
-- malformed/tampered message rejection
-- independent sensor outage and recovery monitoring
-- Week 6 security tests and recorded results
-- technical/security/project documentation
+The AQ-1 system connects simulated farm sensor nodes with a physical IoT temperature sensor through MQTT communication and a security gateway.
 
-Current integration work still includes:
-
-- MQTT authentication support for the monitoring client
-- standardised MQTT topic structure and topic ACLs
-- pH implementation and security tests
-- `SAFE/HOLD` fail-safe controller integration
-- first routed GNS3 Pond A deployment
-- GNS3/Wireshark network evidence
-
-## Current Data Flow
+### Overall Architecture
 
 ```text
-Local DO / Temperature prototype
-          |
-          v
-Mosquitto MQTT broker
-          |
-          v
-Security monitoring / HMAC verification
-          |
-          v
-Trusted / rejected / outage state
-          |
-          v
-SAFE/HOLD control integration (pending)
+Physical DS18B20 Temperature Sensor
+               |
+               v
+            ESP32-C3
+          (Arduino IDE)
+               |
+               v
+       HiveMQ MQTT Broker
+               |
+               v
+       GNS3 Python Gateway <---- Simulated DO Sensor
+               |           <---- Simulated pH Sensor
+               |
+               | <--------- GNS3 Attacker Node
+               v
+       Security Verification
+       - HMAC validation
+       - Sensor identity checks
+       - Sequence/replay checks
+       - Availability monitoring
+               |
+               v
+       Verified Sensor Data
+       Security Events / Alerts
+               |
+               v
+       Arnob's Node-RED Dashboard
+               |
+               +---- Sensor Monitoring
+               +---- Security Alerts
+               +---- Controller Status
+               |
+               v
+       Logical NORMAL / SAFE-HOLD
 ```
 
-## Stretch / Scale-Up Direction
+The GNS3 environment was used to simulate networked aquaculture components, integrate sensor communication and demonstrate cybersecurity attacks.
 
-Only after the one-Pond-A MVP is stable, the design may be expanded with:
+The physical sensor communicated through the public HiveMQ broker, and its readings were received and verified by the GNS3 gateway.
 
-- Pond B and Pond C
-- backup MQTT broker
-- larger attacker/test network
-- additional sensor/feeder identities
-- broader Node-RED dashboard/control functionality
-- TLS and stronger key management
-- broker failover/redundancy tests
-- larger scale/load tests
+## 4. Physical Temperature Sensor Integration
 
-These are **future scale-up/stretch goals**, not the immediate first GNS3 requirement.
+Neha and Sahil worked together on the physical temperature sensor implementation.
 
-## Main Technologies
+### Hardware Used
+
+- ESP32-C3 microcontroller
+- DS18B20 temperature sensor
+- Breadboard and jumper wires
+- 4.7 kΩ pull-up resistor
+- USB connection for programming
+
+### Software and Communication
+
+- Arduino IDE
+- HiveMQ MQTT broker
+- Python-based GNS3 gateway
+
+The DS18B20 collected actual temperature readings. The ESP32-C3 processed these measurements and published sensor messages using MQTT.
+
+The gateway subscribed to the temperature topic:
+
+`aq1/pond1/temperature`
+
+The gateway received the sensor readings and performed security verification.
+
+This integration demonstrated how physical IoT measurements could be incorporated into a virtualised cybersecurity environment.
+
+## 5. Cybersecurity Implementation
+
+### HMAC-SHA256 Verification
+
+The project uses HMAC-SHA256 to check whether sensor messages have been modified.
+
+The sender generates an HMAC using a shared secret key and the agreed message contents.
+
+The gateway recalculates the expected HMAC and compares it with the received value.
+
+Valid messages are accepted, while messages with incorrect HMAC values are rejected.
+
+HMAC provides message integrity and authentication, but it does not encrypt the data.
+
+### Replay Protection
+
+Replay attacks occur when an attacker resends an earlier legitimate message.
+
+Because a replayed message may contain a valid HMAC, the gateway also checks message sequence numbers and freshness information where supported by the sensor pathway.
+
+Messages identified as duplicates or stale are rejected instead of being treated as new measurements.
+
+### Sensor Availability Monitoring
+
+The system monitors the arrival of valid sensor readings.
+
+If a previously active sensor stops providing valid data beyond the configured timeout, an outage warning can be generated.
+
+This is important because the absence of sensor data should not be treated as proof that water conditions remain safe.
+
+### Logical SAFE/HOLD Response
+
+The project demonstrates software-based supervisory control states.
+
+- **NORMAL:** Trusted sensor readings are available for monitoring.
+- **SAFE/HOLD:** The system identifies unavailable or untrusted information and indicates that normal automatic decisions should not continue.
+
+The SAFE/HOLD response is part of the project's cybersecurity and monitoring logic.
+
+**The project did not implement or operate a physical pump, aerator or relay.**
+
+## 6. Cybersecurity Attack Demonstrations
+
+The project uses a controlled attacker node within the GNS3 environment to demonstrate three main cybersecurity threats.
+
+| Attack | Description | Security response |
+|---|---|---|
+| Spoofing | The attacker pretends to be a legitimate sensor and publishes a forged message | Invalid authentication or HMAC causes rejection |
+| Tampering | The attacker changes a sensor reading without creating a matching valid HMAC | The gateway rejects the modified message |
+| Replay | The attacker retransmits a previously valid sensor message | Sequence-number checks identify and reject the repeated message |
+
+These scenarios demonstrate why sensor information must be authenticated and checked before it is used for monitoring or control decisions.
+
+## 7. Node-RED Dashboard
+
+The final project demonstration used ** Node-RED dashboard**.
+
+The dashboard provides a visual interface for monitoring aquaculture sensor information and security events.
+
+Its functions include:
+
+- Displaying temperature and simulated water-quality readings
+- Presenting sensor status and availability
+- Showing security warnings
+- Displaying accepted or rejected message information
+- Presenting logical control states
+- Supporting interpretation of sensor outages and cybersecurity events
+
+The gateway performs the security verification, while Node-RED presents relevant information to the user.
+
+The project also used SQLite as part of its monitoring and data-storage environment.
+
+## 8. Project Development
+
+### Stage 1 — Python and MQTT Prototype
+
+The initial project used Python sensor simulators and Eclipse Mosquitto MQTT.
+
+This helped establish:
+
+- MQTT publishing and subscribing
+- Dissolved oxygen and temperature message formats
+- HMAC generation and verification
+- Tampered-message rejection
+- Sensor outage and recovery detection
+- Security event logging
+
+These initial development files remain in the repository as historical prototype evidence.
+
+### Stage 2 — GNS3 Network Development
+
+Following feedback about project scale, the team expanded the implementation into GNS3.
+
+This involved:
+
+- Building and configuring virtual network components
+- Simulating dissolved oxygen and pH sensors
+- Configuring network communication
+- Integrating the Python security gateway
+- Testing normal and malicious sensor traffic
+- Troubleshooting virtual machines, network adapters and connectivity
+
+### Stage 3 — Physical ESP32 Temperature Sensor
+
+The team integrated an actual DS18B20 temperature sensor with an ESP32-C3.
+
+The ESP32-C3 used HiveMQ to transmit physical sensor readings, which were successfully received by the GNS3 gateway.
+
+### Stage 4 — Dashboard and Security Demonstration
+
+The system was connected with Arnob's Node-RED dashboard for monitoring sensor readings, security alerts and logical control states.
+
+The team prepared demonstrations involving legitimate data, spoofing, tampering, replay attacks and sensor availability.
+
+## 9. Main Technologies
 
 - Python
-- Eclipse Mosquitto MQTT
-- HMAC-SHA256
-- GitHub and GitHub Projects
-- Microsoft Teams
-- Wireshark
 - GNS3
-- Node-RED for planned monitoring/control integration
+- HiveMQ MQTT Broker
+- Eclipse Mosquitto MQTT (initial prototype)
+- HMAC-SHA256
+- ESP32-C3 microcontroller
+- DS18B20 temperature sensor
+- Arduino IDE
+- Node-RED dashboard
+- SQLite
+- Git and GitHub
 
-## Team Technical Focus
+## 10. Team Contributions
 
-- **Sahil Basnet:** sensor/MQTT/network security, temperature producer, broker authentication, HMAC generation, MQTT ACL/topic work, GNS3 network integration
-- **Neha Thanait:** sensor trust validation, HMAC verification, outage/recovery monitoring, security logging/alerts and acceptance/security testing
-- **Md Monirul Haque Arnob:** control/resilience integration, `SAFE/HOLD`, Node-RED/control integration and virtual actuator behaviour
+### Sahil Basnet
 
-## Where to Start in the Documentation
+Worked on sensor communication, MQTT and network security, GNS3 integration, and the physical ESP32 temperature-sensor implementation with Neha.
 
-1. [Current project plan](docs/project-management/project-plan.md) — what we are building, in what order, and MVP vs stretch
-2. [Implementation status](docs/project-management/implementation-status.md) — what actually works today
-3. [Team roles and ownership](docs/team-roles.md) — who owns each technical area
-4. [Documentation index](docs/README.md) — all supporting documentation
-5. [Requirements traceability](docs/project-management/requirements-traceability.md) — requirement-to-implementation/test mapping
-6. [Security test results](testing/security-test-results.md) — recorded security testing
+### Neha Thanait
 
-## Demonstration Goals
+Worked on security monitoring, HMAC verification, sensor outage and recovery detection, security alerts, testing, documentation, GNS3 troubleshooting and the physical temperature-sensor implementation with Sahil.
 
-For the MVP, the team should ultimately demonstrate:
+### Md Monirul Haque Arnob
 
-1. a sensor endpoint communicating across the routed GNS3 Pond A path
-2. valid MQTT credentials accepted and missing/incorrect credentials rejected
-3. a valid HMAC-protected reading accepted
-4. a tampered reading rejected
-5. a required sensor outage detected independently
-6. `SAFE/HOLD` activated when trusted data is unavailable or invalid
-7. controlled recovery when valid trusted data returns
-8. GNS3/Wireshark evidence showing the actual network path
+Worked on GNS3 integration, the Node-RED dashboard and monitoring/control components, including logical SAFE/HOLD behaviour.
 
-## Documentation Rule
 
-For each meaningful implementation change, record:
+## 11. Testing and Demonstration
 
-1. why the work was needed
-2. what was implemented or changed
-3. how it works
-4. how it was configured/run
-5. how it was tested
-6. the observed result
-7. where the evidence is located
-8. what remains
+The project involved testing and demonstrating:
 
-A feature is complete only when it is **built + configured + run + tested + evidenced + documented**.
+1. Valid sensor readings being received and accepted
+2. Physical temperature readings reaching the GNS3 gateway through HiveMQ
+3. HMAC verification
+4. Rejection of spoofed sensor messages
+5. Rejection of tampered sensor messages
+6. Detection of replayed messages
+7. Sensor outage detection
+8. Logical SAFE/HOLD warning states
+9. Display of sensor and security information in Node-RED
 
-Planned and stretch items must remain clearly marked so the repository does not overstate project progress.
+Earlier prototype testing is documented in:
+
+- `testing/Week_6_Security_Test_Plan.md`
+- `testing/security-test-results.md`
+- `docs/evidence/`
+- `docs/gns3/`
+
+Final GNS3 and physical-device evidence should be documented separately from the earlier prototype results.
+
+## 12. Limitations and Future Improvements
+
+AQ-1 is an academic cybersecurity prototype, not a production-ready aquaculture control system.
+
+Current limitations and future improvements include:
+
+- Stronger cryptographic key management
+- TLS-secured MQTT communication
+- Improved broker authentication and access control
+- Consistent replay protection across every sensor pathway
+- More comprehensive testing of network failures
+- Additional physical DO and pH sensors
+- More reliable persistent monitoring storage and recovery procedures
+- Physical pump or aerator integration
+- Further testing under real aquaculture operating conditions
+
+The public HiveMQ broker used in the demonstration communicates over port 1883 without MQTT transport encryption.
+
+The project demonstrates security concepts and software responses, but does not claim to have deployed a fully automated physical farm-control system.
+
+## 13. Key Project Outcome
+
+The main outcome of AQ-1 is demonstrating why IoT sensor readings should be verified before being trusted.
+
+The project combines simulated dissolved oxygen and pH sensors, a physical ESP32 temperature sensor, MQTT communication, a GNS3 security gateway, attack demonstrations and Node-RED monitoring.
+
+This shows how cybersecurity principles can help protect aquaculture systems from misleading sensor information and support safer monitoring decisions.
+
+## 14. Project Documentation
+
+- [Project Plan](docs/project-management/project-plan.md)
+- [Implementation Status](docs/project-management/implementation-status.md)
+- [Team Roles](docs/team-roles.md)
+- [Documentation Index](docs/README.md)
+- [Requirements Traceability](docs/project-management/requirements-traceability.md)
+- [Security Test Results](testing/security-test-results.md)
+- [AI Use Log](AI-log.md)
+
+Features should only be marked complete when supported by implementation, testing and evidence.
