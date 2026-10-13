@@ -310,7 +310,9 @@ The project combines simulated dissolved oxygen and pH sensors, a physical ESP32
 This shows how cybersecurity principles can help protect aquaculture systems from misleading sensor information and support safer monitoring decisions.
 
 ## 14. Project Documentation
-
+- [Final Showcase Evidence](docs/evidence-index.md)
+- [Final Demonstration Screenshots](docs/evidence/final-showcase/)
+- [Physical ESP32-C3 Temperature Sensor Code](hardware/esp32-temperature/)
 - [Project Plan](docs/project-management/project-plan.md)
 - [Implementation Status](docs/project-management/implementation-status.md)
 - [Team Roles](docs/team-roles.md)
