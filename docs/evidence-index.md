@@ -248,7 +248,6 @@ The remaining repository organisation tasks include:
 - Documenting actual final MQTT topic names and sensor identifiers.
 - Linking final security attack results to the available screenshots and test records.
 - Correcting outdated historical document descriptions.
-- Reviewing the older Azure dashboard files and workflow.
 - Updating setup instructions so the final demonstration can be reproduced.
 - Checking that documentation links point to existing files.
 

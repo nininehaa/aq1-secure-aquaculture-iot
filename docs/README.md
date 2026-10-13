@@ -80,7 +80,7 @@ The gateway receives messages and performs security checks before readings are t
 
 Node-RED is the final monitoring dashboard.
 
-The older Azure dashboard implementation is not part of the final showcase.
+Node-RED was used for the final showcase; the unused Azure implementation has been removed from the current repository.
 
 ## 4. Architecture and Design Documents
 
@@ -141,7 +141,7 @@ The final physical temperature pathway was:
 
 The physical sensor was programmed using Arduino IDE.
 
-The corresponding final Arduino sketch, configuration instructions and integration results should be added to the repository when available.
+The [Arduino sketch, setup notes and safe configuration template](../hardware/esp32-temperature/) are available. The [showcase evidence index](evidence-index.md) links the physical sensor photographs and test results.
 
 ## 7. Cybersecurity Testing
 
@@ -235,7 +235,7 @@ Files containing passwords, HMAC secret keys or private credentials must not be 
 
 ## 13. Historical and Superseded Components
 
-The repository contains files associated with the earlier prototype and Azure dashboard experiments.
+The repository retains the early Python and MQTT prototype for development history. The unused Azure dashboard files have been removed from the current branch.
 
 These records may be retained as historical development material but should not be confused with the final Node-RED implementation.
 

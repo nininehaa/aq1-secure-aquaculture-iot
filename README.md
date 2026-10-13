@@ -1,12 +1,17 @@
 # AQ-1 Secure and Resilient IoT Sensor-Control System
 
-## Client
-Coral Coast Aquaculture
+**Client:** Coral Coast Aquaculture  
+**Team:** Neha Thanait, Sahil Basnet and Md Monirul Haque Arnob
 
-## Team Members
-- Neha Thanait
-- Sahil Basnet
-- Md Monirul Haque Arnob
+## Quick links
+
+- [Final showcase evidence](docs/evidence-index.md) and [screenshots](docs/evidence/final-showcase/)
+- [Physical temperature sensor firmware](hardware/esp32-temperature/)
+- [Architecture](docs/architecture/system-architecture.md) and [security design](docs/security/security-design.md)
+- [Testing results](testing/security-test-results.md) and [implementation status](docs/project-management/implementation-status.md)
+- [Team roles](docs/team-roles.md) and [documentation index](docs/README.md)
+
+**Repository status:** The Arduino firmware, early Python prototype and showcase evidence are available here. The final GNS3 export, gateway/attack scripts and Node-RED flow still need to be added for a repeatable setup.
 
 ## 1. Project Overview
 
@@ -170,7 +175,7 @@ These scenarios demonstrate why sensor information must be authenticated and che
 
 ## 7. Node-RED Dashboard
 
-The final project demonstration used ** Node-RED dashboard**.
+The final project demonstration used **Node-RED dashboard**.
 
 The dashboard provides a visual interface for monitoring aquaculture sensor information and security events.
 
@@ -279,7 +284,7 @@ Earlier prototype testing is documented in:
 - `docs/evidence/`
 - `docs/gns3/`
 
-Final GNS3 and physical-device evidence should be documented separately from the earlier prototype results.
+[Final showcase evidence](docs/evidence-index.md) is recorded separately from the earlier Python prototype tests. The final GNS3 project and Node-RED flow are still needed for reproducibility.
 
 ## 12. Limitations and Future Improvements
 
