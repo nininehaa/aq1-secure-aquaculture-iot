@@ -152,10 +152,21 @@ The final ESP32-C3 physical temperature sensor firmware has been uploaded to Git
 
 The physical temperature sensor implementation was developed and tested collaboratively by Sahil Basnet and Neha Thanait. The ESP32-C3 publishes DS18B20 temperature measurements to the HiveMQ MQTT broker, where the GNS3 gateway receives and verifies signed messages.
 
-**Additional evidence to consolidate:**
-- Hardware wiring diagram and photographs.
-- Gateway reception and HMAC verification screenshots.
-- Final demonstration evidence linked to the submitted report.
+**Final showcase evidence:**
+
+| Evidence | File |
+|---|---|
+| Physical ESP32-C3 and DS18B20 setup | [Hardware photograph](evidence/final-showcase/physical_esp32_ds18b20_photo.jpeg) |
+| Physical temperature sensor output | [Serial monitor output](evidence/final-showcase/physical_temperature_serial_output.jpeg) |
+| Gateway verification of valid readings | [Verified messages](evidence/final-showcase/gateway_verified_messages.png) |
+| Valid HMAC acceptance | [HMAC acceptance](evidence/final-showcase/gateway_valid_hmac_acceptance.png) |
+| Replay attack rejection | [Replay rejection](evidence/final-showcase/gateway_do_replay_rejection.png) |
+| Sensor outage and SAFE/HOLD | [Outage response](evidence/final-showcase/gateway_sensor_outage_safehold.png) |
+| Node-RED trusted sensor readings | [Dashboard readings](evidence/final-showcase/node_red_trusted_readings.png) |
+| Node-RED outage indication | [Dashboard outage](evidence/final-showcase/node_red_outage_indication.png) |
+| Final demonstration data flow | [System data flow](evidence/final-showcase/final_showcase_data_flow.jpeg) |
+
+These images are extracted from the submitted AQ-1 final report and document the demonstrated prototype. A complete pin-by-pin wiring diagram and a separate wrong-HMAC attack screenshot are not included in this evidence set.
 
 Real Wi-Fi passwords and HMAC secret keys are not included in the uploaded configuration template.
 
@@ -233,10 +244,9 @@ These documents provide historical context and should retain the chronological d
 The remaining repository organisation tasks include:
 
 - Consolidating the final GNS3 project and source files.
-- Adding the ESP32 Arduino sketch.
 - Adding the final Node-RED flow.
 - Documenting actual final MQTT topic names and sensor identifiers.
-- Recording final security attack outcomes.
+- Linking final security attack results to the available screenshots and test records.
 - Correcting outdated historical document descriptions.
 - Reviewing the older Azure dashboard files and workflow.
 - Updating setup instructions so the final demonstration can be reproduced.
