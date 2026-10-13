@@ -1,2 +1,23 @@
+# Local credentials and signing keys
 configs/mosquitto/passwords.txt
+**/secrets.h
+**/.env
+**/.env.*
+!**/.env.example
+*.key
+*.pem
+
+# Logs and Python temporary files
 scripts/monitoring/sensor.log
+*.log
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local state and editor files
+replay_state.json
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
