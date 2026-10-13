@@ -89,6 +89,16 @@ His areas of involvement included:
 
 Arnob's work contributed to the GNS3 infrastructure, dashboard visualisation and logical supervisory control components of the integrated project.
 
+### Individual Contribution Summary
+
+| Team member | Contribution | Main technical responsibilities |
+|---|---|---|
+| Sahil Basnet | 33.33% | Sensor development, MQTT communication, network configuration and physical ESP32-C3 temperature sensor integration |
+| Neha Thanait | 33.33% | Security monitoring, HMAC verification testing, sensor outage detection, logging and integration testing |
+| Md Monirul Haque Arnob | 33.34% | GNS3 environment, gateway verification, Node-RED dashboard, security testing and logical SAFE/HOLD integration |
+
+The contribution percentages follow the submitted final report. Sensor integration, troubleshooting and final demonstration preparation also involved collaboration between team members.
+
 ## 6. Team Responsibilities and Collaboration
 
 AQ-1 was developed collaboratively by Sahil Basnet, Neha Thanait and Md Monirul Haque Arnob.
