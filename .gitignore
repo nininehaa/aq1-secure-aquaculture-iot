@@ -1,2 +1,6 @@
 configs/mosquitto/passwords.txt
 scripts/monitoring/sensor.log
+**/secrets.h
+**/.env
+**/.env.*
+!**/.env.example
