@@ -141,13 +141,23 @@ DS18B20 Temperature Sensor
 
 The team successfully received physical temperature readings at the GNS3 gateway through HiveMQ.
 
-### Artefacts to Consolidate
+### Physical Sensor Implementation Evidence
 
-- Final Arduino sketch.
-- Relevant hardware wiring information.
-- MQTT topic and connection configuration, excluding credentials.
-- Gateway reception and verification results.
-- Photographs or screenshots from testing, where available.
+The final ESP32-C3 physical temperature sensor firmware has been uploaded to GitHub.
+
+**Available files:**
+- [Final Arduino sketch](../hardware/esp32-temperature/AQ1_Physical_Temperature_HMAC.ino)
+- [Physical sensor README](../hardware/esp32-temperature/README.md)
+- [Safe configuration template](../hardware/esp32-temperature/secrets.example.h)
+
+The physical temperature sensor implementation was developed and tested collaboratively by Sahil Basnet and Neha Thanait. The ESP32-C3 publishes DS18B20 temperature measurements to the HiveMQ MQTT broker, where the GNS3 gateway receives and verifies signed messages.
+
+**Additional evidence to consolidate:**
+- Hardware wiring diagram and photographs.
+- Gateway reception and HMAC verification screenshots.
+- Final demonstration evidence linked to the submitted report.
+
+Real Wi-Fi passwords and HMAC secret keys are not included in the uploaded configuration template.
 
 ## 7. Cybersecurity Attack Testing
 
