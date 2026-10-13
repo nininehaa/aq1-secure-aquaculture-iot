@@ -83,3 +83,33 @@ The submitted report attributes contributions to **Neha, Sahil and Arnob** and g
 ## 7. What this reconciliation branch changes
 
 Documentation **only**. No executable code, MQTT settings, keys, demo scripts or existing historical documents have been altered. The next step is to retrieve the real final showcase package from the teammates and compare its runtime code to the report before making functional modifications.
+
+
+## 8. Team contribution reconciliation (submitted report is the baseline)
+
+**Submitted final report, §5, p.4** records this equal split:
+
+| Member | Submitted report allocation | Submitted report wording | Clarification for repository |
+| --- | --- | --- | --- |
+| Neha Thanait | **33.33%** | Monitoring and trust-validation work; **confirm final scope** | Index `scripts/monitoring/monitor.py`, monitoring/trust design, testing and evidence as potential supporting records; do not imply all repository files are exclusively authored by Neha. |
+| Sahil Basnet | **33.33%** | Sensor, MQTT and network work; **confirm final scope** | Index sensor/MQTT scripts and GNS3 networking documentation, with joint physical-temperature work documented only if supported by actual team records. |
+| Md Monirul Haque Arnob | **33.34%** | HMAC proof of concept, signed-message structure, gateway verification and test evidence; **confirm final scope** | The report summary emphasizes HMAC/gateway/tests. Technical Artefact 2 also discusses a Node-RED dashboard and integrated monitoring. Record dashboard authorship based on actual commits, exports and team confirmation; do not rewrite report wording. |
+
+**Important:** the report itself explicitly states that these summaries and final technical-lead assignments require confirmation. They are not a verified per-commit authorship ledger. Source file presence, a teammate's contribution and the person who uploaded the ZIP must not be conflated. Preserve existing commit authors and chronological evidence; any corrected contribution overview should cite the team's actual work records.
+
+## 9. Newly supplied final transfer ZIP: inventory and security gate
+
+**Inspected:** `AQ1_Team2_Transfer(6).zip` (provided after repository audit). This is a *local handover source*, not yet a checked-in artifact. It contains:
+
+- `AQ1_Team2_Final.gns3project` — contains the GNS3 topology *plus embedded Docker-node files*, including `gateway.py`, `do_sensor.py`, `ph_sensor.py`, and attacker capture/replay scripts.
+- `NodeRED_Install\\flows.json`, `package.json`, `package-lock.json`, and `aq1_team2.db`.
+
+This is strong supporting evidence for the final virtual sensor/gateway/Node-RED implementation, but **it does not contain the ESP32-C3 Arduino firmware sketch**.
+
+**DO NOT upload the original GNS3 project archive into the public repo unchanged.** The embedded Docker-node directories contain `do_hmac.key`, `ph_hmac.key`, `temp_hmac.key`, and `*.env` files. These are sensitive signing material or potential secrets. Also review the Node-RED flow, database and all embedded scripts for credentials, token fields, retained telemetry and addresses before publication. If keys in this ZIP have been used by a live deployment, rotate them; a gitignore entry alone does not protect secrets embedded inside a `.gns3project` ZIP.
+
+Recommended safe follow-up: extract the final gateway/sensor/attacker source, **replace every actual secret with environment-variable configuration**, supply example values only, strip signing-key files and private data from a rebuilt portable GNS3 project, and test that the sanitised package still works. Do not alter the historical submitted report to pretend that these new security mitigations were demonstrated at the showcase. Document post-submission improvements separately.
+
+### Evidence and authorship boundaries
+
+The ZIP provides a snapshot of runnable-looking source/configuration, but lacks Git revision attribution for individual embedded node files. It therefore **cannot independently prove which member wrote each script**. Cross-check against GitHub/Teams history and get team confirmation before allocating file authorship. No change to the 33.33/33.33/33.34 report split is proposed.
