@@ -2,6 +2,8 @@
 
 **Client:** Coral Coast Aquaculture  
 **Team:** Neha Thanait, Sahil Basnet and Md Monirul Haque Arnob
+<img width="1896" height="866" alt="70B4075C-FF25-4C5B-9041-F5CB57889791" src="https://github.com/user-attachments/assets/3f5ce118-3ecc-4036-95ae-696974602ea4" />
+<img width="1886" height="871" alt="F7010B85-FD76-4963-8E62-BF03427E5EF6" src="https://github.com/user-attachments/assets/99b5d036-b836-42eb-9b16-b8dfe6ed504e" />
 
 ## Quick links
 
