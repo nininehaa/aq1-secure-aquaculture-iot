@@ -1,335 +1,358 @@
-import hashlib
-import hmac
-import json
-import os
-import random
-import threading
-import time
-from datetime import datetime, timezone
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#include <Preferences.h>
+#include <math.h>
+#include <stdint.h>
+#include "mbedtls/md.h"
+#include "secrets.h"
 
-import paho.mqtt.client as mqtt
+// =============================================
+// AQ-1 PHYSICAL TEMPERATURE SENSOR V2
+// ESP32-C3 + DS18B20
+// MQTT + HMAC-SHA256 + Replay Protection
+// =============================================
 
+// DEVICE IDENTITY
+const char* DEVICE_ID   = "POND-A-ESP32-01";
+const char* SENSOR_ID   = "TEMP-001";
+const char* POND_ID     = "POND-01";
+const char* SENSOR_TYPE = "temperature";
+const char* UNIT        = "C";
 
-# ==================================================
-# AQ-1 SECURE TEMPERATURE SENSOR
-# Coral Coast Aquaculture
-# ==================================================
+// MQTT
+const char* MQTT_TOPIC = "aq1/pond1/temperature";
+const int MQTT_PORT = 1883;
 
-BROKER = "localhost"
-PORT = 1883
-TOPIC = "aq1/pond1/temperature"
+// DS18B20
+#define ONE_WIRE_BUS 4
 
-SENSOR_ID = "TEMP-001"
-POND_ID = "POND-01"
-SENSOR_TYPE = "temperature"
-UNIT = "C"
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
 
-PUBLISH_INTERVAL = 5
+// NETWORK
+WiFiClient wifiClient;
+PubSubClient mqttClient(wifiClient);
 
+// PERSISTENT REPLAY COUNTER
+Preferences preferences;
+uint32_t sequenceNumber = 0;
 
-# ==================================================
-# SECURITY CONFIGURATION
-# Secrets are loaded from environment variables.
-# They are NOT stored in the GitHub repository.
-# ==================================================
+// =============================================
+// HMAC-SHA256
+// =============================================
 
-MQTT_USERNAME = os.getenv("AQ1_MQTT_USERNAME")
-MQTT_PASSWORD = os.getenv("AQ1_MQTT_PASSWORD")
-TEMP_HMAC_KEY = os.getenv("AQ1_TEMP_HMAC_KEY")
+String createHMAC(const String& message) {
 
+  byte hmacResult[32];
 
-if not MQTT_USERNAME:
-    raise RuntimeError(
-        "AQ1_MQTT_USERNAME is not configured."
-    )
+  mbedtls_md_context_t ctx;
+  mbedtls_md_init(&ctx);
 
-if not MQTT_PASSWORD:
-    raise RuntimeError(
-        "AQ1_MQTT_PASSWORD is not configured."
-    )
+  const mbedtls_md_info_t* info =
+    mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
 
-if not TEMP_HMAC_KEY:
-    raise RuntimeError(
-        "AQ1_TEMP_HMAC_KEY is not configured."
-    )
+  if (info == nullptr ||
+      mbedtls_md_setup(&ctx, info, 1) != 0) {
+    mbedtls_md_free(&ctx);
+    return "";
+  }
 
+  int result = mbedtls_md_hmac_starts(
+    &ctx,
+    (const unsigned char*)TEMP_HMAC_KEY,
+    strlen(TEMP_HMAC_KEY)
+  );
 
-# ==================================================
-# CONNECTION STATE
-# ==================================================
+  if (result == 0) {
+    result = mbedtls_md_hmac_update(
+      &ctx,
+      (const unsigned char*)message.c_str(),
+      message.length()
+    );
+  }
 
-connected_event = threading.Event()
+  if (result == 0) {
+    result = mbedtls_md_hmac_finish(
+      &ctx,
+      hmacResult
+    );
+  }
 
+  mbedtls_md_free(&ctx);
 
-# ==================================================
-# SENSOR FUNCTIONS
-# ==================================================
+  if (result != 0) {
+    return "";
+  }
 
-def generate_temperature():
-    """
-    Simulate realistic aquaculture
-    water temperature between 24 and 30 C.
-    """
+  char outputBuffer[65];
 
-    return round(
-        random.uniform(24.0, 30.0),
-        2,
-    )
+  for (int i = 0; i < 32; i++) {
+    sprintf(
+      outputBuffer + (i * 2),
+      "%02x",
+      hmacResult[i]
+    );
+  }
 
+  outputBuffer[64] = '\0';
 
-def determine_status(value):
-    """
-    Convert the temperature reading
-    into a simple operational status.
-    """
+  return String(outputBuffer);
+}
 
-    if value < 25.0:
-        return "LOW"
+// =============================================
+// WIFI
+// =============================================
 
-    if value > 29.0:
-        return "HIGH"
+void connectWiFi() {
 
-    return "NORMAL"
+  Serial.println("Connecting to Wi-Fi...");
 
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-def create_signed_string(
-    sensor_id,
-    pond_id,
-    sensor_type,
-    value,
-    unit,
-    status,
-    timestamp,
-):
-    """
-    Canonical message format.
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
 
-    Neha's verification component MUST use
-    this exact field order and separator.
-    """
+  Serial.println();
+  Serial.println("Wi-Fi: CONNECTED");
 
-    return (
-        f"{sensor_id}|"
-        f"{pond_id}|"
-        f"{sensor_type}|"
-        f"{value}|"
-        f"{unit}|"
-        f"{status}|"
-        f"{timestamp}"
-    )
+  Serial.print("ESP32 IP: ");
+  Serial.println(WiFi.localIP());
+}
 
+// =============================================
+// MQTT
+// =============================================
 
-def generate_hmac(signed_message):
-    """
-    Generate HMAC-SHA256 message signature.
-    """
+void connectMQTT() {
 
-    return hmac.new(
-        TEMP_HMAC_KEY.encode("utf-8"),
-        signed_message.encode("utf-8"),
-        hashlib.sha256,
-    ).hexdigest()
+  while (!mqttClient.connected()) {
 
+    Serial.println("Connecting to MQTT broker...");
 
-def create_message():
-    """
-    Generate one complete authenticated
-    temperature sensor payload.
-    """
+    // Public HiveMQ broker
+    bool connected = mqttClient.connect(DEVICE_ID);
 
-    value = generate_temperature()
-    status = determine_status(value)
-
-    timestamp = (
-        datetime.now(timezone.utc)
-        .isoformat()
-    )
-
-    signed_message = create_signed_string(
-        SENSOR_ID,
-        POND_ID,
-        SENSOR_TYPE,
-        value,
-        UNIT,
-        status,
-        timestamp,
-    )
-
-    signature = generate_hmac(
-        signed_message
-    )
-
-    return {
-        "sensor_id": SENSOR_ID,
-        "pond_id": POND_ID,
-        "sensor_type": SENSOR_TYPE,
-        "value": value,
-        "unit": UNIT,
-        "status": status,
-        "timestamp": timestamp,
-        "hmac": signature,
+    if (connected) {
+      Serial.println("MQTT: CONNECTED");
+    } else {
+      Serial.print("MQTT: FAILED, state=");
+      Serial.println(mqttClient.state());
+      delay(5000);
     }
+  }
+}
 
+// =============================================
+// SETUP
+// =============================================
 
-# ==================================================
-# MQTT CALLBACKS
-# ==================================================
+void setup() {
 
-def on_connect(
-    client,
-    userdata,
-    flags,
-    reason_code,
-    properties,
-):
-    if reason_code == 0:
+  Serial.begin(115200);
+  delay(1500);
 
-        print(
-            "MQTT authentication successful."
-        )
+  Serial.println();
+  Serial.println("=================================");
+  Serial.println("AQ-1 Secure Physical Temperature V2");
+  Serial.println("=================================");
 
-        print(
-            "Connected to secure "
-            "Mosquitto broker."
-        )
+  Serial.print("Device ID: ");
+  Serial.println(DEVICE_ID);
 
-        connected_event.set()
+  Serial.print("Sensor ID: ");
+  Serial.println(SENSOR_ID);
 
-    else:
+  // Initialise persistent storage
+  if (!preferences.begin("aq1-temp", false)) {
+    Serial.println("ERROR: Cannot open sequence storage");
 
-        print(
-            "MQTT connection rejected. "
-            f"Reason: {reason_code}"
-        )
+    while (true) {
+      delay(1000);
+    }
+  }
 
+  // Load saved sequence
+  sequenceNumber = preferences.getUInt("sequence", 0);
 
-def on_disconnect(
-    client,
-    userdata,
-    disconnect_flags,
-    reason_code,
-    properties,
-):
-    connected_event.clear()
+  Serial.print("Stored sequence number: ");
+  Serial.println(sequenceNumber);
 
+  // Initialise physical sensor
+  sensors.begin();
 
-# ==================================================
-# MQTT CLIENT
-# ==================================================
+  Serial.print("Temperature sensors detected: ");
+  Serial.println(sensors.getDeviceCount());
 
-client = mqtt.Client(
-    mqtt.CallbackAPIVersion.VERSION2,
-    client_id=SENSOR_ID,
-)
+  if (sensors.getDeviceCount() == 0) {
+    Serial.println("ERROR: No DS18B20 sensor detected");
 
-client.username_pw_set(
-    MQTT_USERNAME,
-    MQTT_PASSWORD,
-)
+    while (true) {
+      delay(1000);
+    }
+  }
 
-client.on_connect = on_connect
-client.on_disconnect = on_disconnect
+  // Connect Wi-Fi
+  connectWiFi();
 
+  // Configure MQTT
+  mqttClient.setServer(MQTT_BROKER, MQTT_PORT);
+  mqttClient.setBufferSize(1024);
 
-# ==================================================
-# MAIN SENSOR LOOP
-# ==================================================
+  connectMQTT();
+}
 
-try:
+// =============================================
+// MAIN LOOP
+// =============================================
 
-    print()
-    print(
-        "AQ-1 Secure Temperature Sensor"
-    )
-    print(
-        "================================"
-    )
-    print(f"Sensor ID   : {SENSOR_ID}")
-    print(f"Pond        : {POND_ID}")
-    print(f"Topic       : {TOPIC}")
-    print("MQTT Auth   : ENABLED")
-    print("HMAC-SHA256 : ENABLED")
-    print()
+void loop() {
 
-    client.connect(
-        BROKER,
-        PORT,
-        60,
-    )
+  // Maintain Wi-Fi
+  if (WiFi.status() != WL_CONNECTED) {
+    connectWiFi();
+  }
 
-    client.loop_start()
+  // Maintain MQTT
+  if (!mqttClient.connected()) {
+    connectMQTT();
+  }
 
-    if not connected_event.wait(timeout=5):
+  mqttClient.loop();
 
-        raise RuntimeError(
-            "Could not establish an "
-            "authenticated MQTT connection."
-        )
+  // Read temperature
+  sensors.requestTemperatures();
 
-    while True:
+  float temperature = sensors.getTempCByIndex(0);
 
-        message = create_message()
+  // Validate physical reading
+  if (
+    temperature == DEVICE_DISCONNECTED_C ||
+    !isfinite(temperature) ||
+    temperature < -55.0 ||
+    temperature > 125.0
+  ) {
+    Serial.println("ERROR: Invalid temperature reading");
+    delay(5000);
+    return;
+  }
 
-        payload = json.dumps(
-            message,
-            separators=(",", ":"),
-        )
+  String value = String(temperature, 2);
+  String status = "OK";
 
-        publish_result = client.publish(
-            TOPIC,
-            payload,
-            qos=1,
-        )
+  // ===========================================
+  // PERSISTENT SEQUENCE COUNTER
+  // ===========================================
 
-        publish_result.wait_for_publish()
+  if (sequenceNumber == UINT32_MAX) {
+    Serial.println("ERROR: Sequence counter exhausted");
 
-        print(
-            f"{message['timestamp']} | "
-            f"{SENSOR_ID} | "
-            f"{message['value']} {UNIT} | "
-            f"{message['status']}"
-        )
+    while (true) {
+      delay(1000);
+    }
+  }
 
-        print(
-            "HMAC-SHA256: "
-            f"{message['hmac']}"
-        )
+  uint32_t nextSequence = sequenceNumber + 1;
 
-        print(
-            "SECURE READING PUBLISHED"
-        )
+  // Save BEFORE publishing
+  size_t bytesWritten =
+    preferences.putUInt("sequence", nextSequence);
 
-        print()
+  if (bytesWritten != sizeof(uint32_t)) {
+    Serial.println("ERROR: Cannot persist sequence number");
+    delay(5000);
+    return;
+  }
 
-        time.sleep(
-            PUBLISH_INTERVAL
-        )
+  sequenceNumber = nextSequence;
 
+  Serial.print("Sequence Number: ");
+  Serial.println(sequenceNumber);
 
-except KeyboardInterrupt:
+  // ===========================================
+  // TIMESTAMP
+  // ===========================================
 
-    print()
-    print(
-        "Temperature sensor stopped."
-    )
+  // ESP32 uptime in milliseconds.
+  // Unix timestamp upgrade planned later.
+  String timestamp = String(millis());
 
+  // ===========================================
+  // CANONICAL HMAC MESSAGE
+  //
+  // sensor_id|pond_id|sensor_type|value|
+  // unit|status|timestamp|sequence
+  // ===========================================
 
-except Exception as error:
+  String signedMessage =
+    String(SENSOR_ID) + "|" +
+    String(POND_ID) + "|" +
+    String(SENSOR_TYPE) + "|" +
+    value + "|" +
+    String(UNIT) + "|" +
+    status + "|" +
+    timestamp + "|" +
+    String(sequenceNumber);
 
-    print()
-    print(
-        "TEMPERATURE SENSOR ERROR:"
-    )
+  String hmacValue = createHMAC(signedMessage);
 
-    print(error)
+  if (hmacValue.length() != 64) {
+    Serial.println("ERROR: HMAC generation failed");
+    delay(5000);
+    return;
+  }
 
+  // ===========================================
+  // JSON PAYLOAD
+  // ===========================================
 
-finally:
+  String payload = "{";
 
-    client.loop_stop()
+  payload += "\"sensor_id\":\"" + String(SENSOR_ID) + "\",";
+  payload += "\"pond_id\":\"" + String(POND_ID) + "\",";
+  payload += "\"sensor_type\":\"" + String(SENSOR_TYPE) + "\",";
+  payload += "\"value\":" + value + ",";
+  payload += "\"unit\":\"" + String(UNIT) + "\",";
+  payload += "\"status\":\"" + status + "\",";
+  payload += "\"timestamp\":\"" + timestamp + "\",";
+  payload += "\"sequence\":" + String(sequenceNumber) + ",";
+  payload += "\"hmac\":\"" + hmacValue + "\"";
 
-    try:
-        client.disconnect()
+  payload += "}";
 
-    except Exception:
-        pass
+  // ===========================================
+  // SERIAL OUTPUT
+  // ===========================================
+
+  Serial.println();
+
+  Serial.print("Temperature: ");
+  Serial.print(value);
+  Serial.println(" C");
+
+  Serial.print("MQTT topic: ");
+  Serial.println(MQTT_TOPIC);
+
+  Serial.print("Payload: ");
+  Serial.println(payload);
+
+  // ===========================================
+  // MQTT PUBLISH
+  // ===========================================
+
+  bool published = mqttClient.publish(
+    MQTT_TOPIC,
+    payload.c_str()
+  );
+
+  if (published) {
+    Serial.println("Publish: SUCCESS");
+  } else {
+    Serial.println("Publish: FAILED");
+  }
+
+  delay(5000);
+}
